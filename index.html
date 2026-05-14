@@ -970,7 +970,8 @@ header p {
         </label>
         <div class="btn-actions" style="display:none" id="bomActions">
           <button class="btn" onclick="window.print()">Print</button>
-          <button class="btn primary" onclick="copyBOM()">Copy</button>
+          <button class="btn" onclick="copyBOM()">Copy</button>
+          <button class="btn primary" onclick="downloadCSV()">Create CSV</button>
         </div>
       </div>
     </div>
@@ -6189,6 +6190,140 @@ function copyBOM() {
     btn.textContent = "✓ Copied";
     setTimeout(() => btn.textContent = "Copy", 2000);
   });
+}
+
+// ─── CSV export (catalog-template format, 27 columns) ────────────
+function csvEscape(v) {
+  if (v == null) return "";
+  const s = String(v);
+  if (/[",\n\r]/.test(s)) return `"${s.replace(/"/g, '""')}"`;
+  return s;
+}
+
+// Map our BOM category -> estimating-software friendly group + cost type
+const CSV_GROUP_LABEL = {
+  framing:   "Framing",
+  decking:   "Decking",
+  fascia:    "Fascia",
+  stair:     "Stairs",
+  railing:   "Railing",
+  fastener:  "Fasteners",
+  hardware:  "Hardware",
+  tape:      "Joist Tape",
+  concrete:  "Concrete",
+  labor:     "Labor",
+  paperwork: "Permits & Drawings",
+  tax:       "Sales Tax"
+};
+const CSV_COST_TYPE = {
+  framing: "Materials", decking: "Materials", fascia: "Materials", stair: "Materials",
+  railing: "Materials", fastener: "Materials", hardware: "Materials",
+  tape: "Materials", concrete: "Materials",
+  labor: "Labor", paperwork: "Other", tax: "Other"
+};
+
+function buildCSV(bom, input) {
+  const headers = [
+    "Cost Group Template Name","Cost Group Name","Cost Item Name","Description",
+    "Quantity","Quantity Formula","Unit","Unit Cost","Unit Cost Formula",
+    "Unit Price","Unit Price Formula","Margin","Cost Type","Cost Code",
+    "Taxable","Selected","Minimum Selections","Maximum Selections","Allowance Type",
+    "Allows Customer Write-In","Specification","Require Specification Approval",
+    "Show Child Costs","Show Child Deltas","Show Children","Show Description","Show Quantity"
+  ];
+
+  const today = new Date().toISOString().slice(0, 10);
+  const dims = `${input.P || "?"}x${input.W || "?"}`;
+  const templateName = `Vivid Outdoor Living - ${dims} Deck (${today})`;
+
+  const MARKUP = 1.85;
+  const taxRate = (+input.taxRate || 7.5) / 100;
+
+  const rows = [headers.join(",")];
+
+  bom.forEach(line => {
+    // Skip BOM-only lines that don't belong in a customer catalog export
+    if (line.qty == null || line.qty <= 0) return;
+    if (line.category === "tax") return;   // tax is computed by the receiving software
+
+    const cost = line.unit_price ?? 0;
+    const isTaxable = ["framing","decking","fascia","stair","railing","fastener","hardware","tape","concrete"].includes(line.category);
+
+    // Customer unit price = cost × (1 + tax) × markup for taxable materials;
+    // for labor/paperwork it's just cost × markup (paperwork actually passes through, see below).
+    let price;
+    if (line.category === "paperwork") {
+      price = cost;            // permits + drawings pass through at cost (no markup)
+    } else if (isTaxable) {
+      price = cost * (1 + taxRate) * MARKUP;
+    } else {
+      price = cost * MARKUP;   // labor
+    }
+    price = +price.toFixed(2);
+
+    const marginPct = cost > 0 ? +((1 - cost / price) * 100).toFixed(2) : 0;
+
+    const groupName = CSV_GROUP_LABEL[line.category] || line.category;
+    const costType  = CSV_COST_TYPE[line.category] || "Other";
+    // Cost Item Name = short, Description = full
+    const itemName = (line.description || "").split(" - ")[0].slice(0, 80) || "Item";
+
+    rows.push([
+      templateName,                                  // Cost Group Template Name
+      groupName,                                     // Cost Group Name
+      itemName,                                      // Cost Item Name
+      line.description || "",                        // Description
+      line.qty,                                      // Quantity
+      "",                                            // Quantity Formula
+      line.unit || "ea",                             // Unit
+      cost.toFixed(2),                               // Unit Cost
+      "",                                            // Unit Cost Formula
+      price.toFixed(2),                              // Unit Price
+      "",                                            // Unit Price Formula
+      marginPct,                                     // Margin (gross %)
+      costType,                                      // Cost Type
+      line.sku || "",                                // Cost Code
+      isTaxable ? "TRUE" : "FALSE",                  // Taxable
+      "TRUE",                                        // Selected
+      "",                                            // Minimum Selections
+      "",                                            // Maximum Selections
+      "",                                            // Allowance Type
+      "FALSE",                                       // Allows Customer Write-In
+      line.notes || "",                              // Specification
+      "FALSE",                                       // Require Specification Approval
+      "TRUE",                                        // Show Child Costs
+      "TRUE",                                        // Show Child Deltas
+      "TRUE",                                        // Show Children
+      "TRUE",                                        // Show Description
+      "TRUE"                                         // Show Quantity
+    ].map(csvEscape).join(","));
+  });
+
+  // UTF-8 BOM so Excel opens it cleanly with proper character encoding
+  return "﻿" + rows.join("\n");
+}
+
+function downloadCSV() {
+  const input = readForm();
+  if (!input.main?.collection || !input.P || !input.W) {
+    alert("Configure deck dimensions and decking selection before exporting.");
+    return;
+  }
+  let out;
+  try { out = rollupBOM(input); }
+  catch (err) { alert("Cannot build CSV: " + err.message); return; }
+
+  const csv = buildCSV(out.bom, input);
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  const dims = `${input.P}x${input.W}`;
+  a.href = url;
+  a.download = `vivid-deck-${dims}-${new Date().toISOString().slice(0,10)}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
 </script>
