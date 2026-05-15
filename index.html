@@ -2303,6 +2303,7 @@ const PRICES_TIMBERTECH = {"A55X55ICAPMB": 45.0,
 
 const PRICES_LUMBER = {
   "2x6": {
+    "4": 5.5,
     "8": 9.5,
     "10": 12.0,
     "12": 14.5,
@@ -2311,6 +2312,7 @@ const PRICES_LUMBER = {
     "20": 26.0
   },
   "2x8": {
+    "4": 7.0,
     "8": 13.0,
     "10": 16.0,
     "12": 19.0,
@@ -2319,6 +2321,7 @@ const PRICES_LUMBER = {
     "20": 34.0
   },
   "2x10": {
+    "4": 9.0,
     "8": 17.0,
     "10": 21.0,
     "12": 24.5,
@@ -2327,6 +2330,7 @@ const PRICES_LUMBER = {
     "20": 47.0
   },
   "2x12": {
+    "4": 12.0,
     "8": 22.0,
     "10": 27.0,
     "12": 31.5,
@@ -2335,11 +2339,13 @@ const PRICES_LUMBER = {
     "20": 60.0
   },
   "4x4": {
+    "4": 7.5,
     "8": 14.0,
     "10": 19.0,
     "12": 24.0
   },
   "6x6": {
+    "4": 22.0,
     "8": 40.0,
     "10": 52.0,
     "12": 64.0,
@@ -2983,14 +2989,22 @@ const DECKING_SKU_LOOKUP = {
 // Cortex SKU lookup: "collection|color|kind+size" -> SKU
 // kind: h=hand-drive, c=collated, fas=fascia. size: 100 or 300
 const CORTEX_SKU_LOOKUP = {
+  "harvest_plus|Gray|h400": "CTC400PCTBG",
+  "harvest_plus|Gray|h80": "CTC80PCTBG",
+  "harvest_plus|Timber Gray|h400": "CTC400PCTBG",
+  "harvest_plus|Timber Gray|h80": "CTC80PCTBG",
+  "harvest_plus|Toasted Wheat|h400": "CTC400PCTWH",
+  "harvest_plus|Toasted Wheat|h80": "CTC80PCTWH",
+  "harvest_plus|Wheat|h400": "CTC400PCTWH",
+  "harvest_plus|Wheat|h80": "CTC80PCTWH",
   "harvest|Brownstone|c100": "CTC100SFBS",
   "harvest|Brownstone|c300": "CTC300SFBS",
   "harvest|Brownstone|h100": "CTX100SFBS",
   "harvest|Brownstone|h300": "CTX300SFBS",
   "harvest|Brownstone|h400": "CTC400PCBS",
   "harvest|Brownstone|h80": "CTC80PCBS",
-  "harvest|Gray|h400": "CTC400PCTBG",
-  "harvest|Gray|h80": "CTC80PCTBG",
+  "harvest|Gray|h400": "CTC400PCSG",
+  "harvest|Gray|h80": "CTC80PCSG",
   "harvest|Kona|c100": "CTC100SFKO",
   "harvest|Kona|c300": "CTC300SFKO",
   "harvest|Kona|h100": "CTX100SFKO",
@@ -3001,10 +3015,16 @@ const CORTEX_SKU_LOOKUP = {
   "harvest|Slate Gray|c300": "CTC300SFSG",
   "harvest|Slate Gray|h100": "CTX100SFSG",
   "harvest|Slate Gray|h300": "CTX300SFSG",
-  "harvest|Wheat|h400": "CTC400PCTWH",
-  "harvest|Wheat|h80": "CTC80PCTWH",
+  "harvest|Slate Gray|h400": "CTC400PCSG",
+  "harvest|Slate Gray|h80": "CTC80PCSG",
+  "landmark|American Walnut|h400": "CTC400PCAW",
+  "landmark|American Walnut|h80": "CTC80PCAW",
   "landmark|Boardwalk|h400": "CTC400PCBD",
   "landmark|Boardwalk|h80": "CTC80PCBD",
+  "landmark|Castle Gate|h400": "CTC400PCCG",
+  "landmark|Castle Gate|h80": "CTC80PCCG",
+  "landmark|French White Oak|h400": "CTC400PCFW",
+  "landmark|French White Oak|h80": "CTC80PCFW",
   "landmark|Gate|h400": "CTC400PCCG",
   "landmark|Gate|h80": "CTC80PCCG",
   "landmark|Oak|h400": "CTC400PCFW",
@@ -3047,40 +3067,98 @@ const CORTEX_SKU_LOOKUP = {
   "legacy|Tigerwood|h100": "CTX100LCTW",
   "legacy|Tigerwood|h400": "CTC400PCTW",
   "legacy|Tigerwood|h80": "CTC80PCTW",
-  "premier|Gray|c100": "CTC100LFMG",
-  "premier|Gray|c300": "CTC300SFMG",
+  "legacy|Whitewash Cedar|c100": "CTC100LFWC",
+  "legacy|Whitewash Cedar|c300": "CTC300SFWC",
+  "legacy|Whitewash Cedar|fas50": "CTXFAS100WC",
+  "legacy|Whitewash Cedar|h100": "CTX100LCWC",
+  "legacy|Whitewash Cedar|h400": "CTC400PCWC",
+  "legacy|Whitewash Cedar|h80": "CTC80PCWC",
+  "premier_plus|Natural Oak|c100": "CTC100LFNO",
+  "premier_plus|Natural Oak|c300": "CTC300SFNO",
+  "premier_plus|Oak|c100": "CTC100LFNO",
+  "premier_plus|Oak|c300": "CTC300SFNO",
+  "premier|Dark Teak|c100": "CTC100LFPDT",
+  "premier|Dark Teak|c300": "CTC300SFPDT",
+  "premier|Dark Teak|fas50": "CTXFAS100DT",
+  "premier|Dark Teak|h100": "CTX100EDT",
+  "premier|Dark Teak|h400": "CTC400PCDT",
+  "premier|Dark Teak|h80": "CTC80PCDT",
+  "premier|Gray|c100": "CTC100LFPMG",
+  "premier|Gray|c300": "CTC300SFPMG",
   "premier|Gray|fas50": "CTXFAS100MG",
   "premier|Gray|h100": "CTX100EMG",
   "premier|Gray|h400": "CTC400PCMG",
   "premier|Gray|h80": "CTC80PCMG",
-  "premier|Oak|c100": "CTC100LFNO",
-  "premier|Oak|c300": "CTC300SFNO",
-  "premier|Teak|c100": "CTC100LFDT",
-  "premier|Teak|c300": "CTC300SFDT",
+  "premier|Maritime Gray|c100": "CTC100LFPMG",
+  "premier|Maritime Gray|c300": "CTC300SFPMG",
+  "premier|Maritime Gray|fas50": "CTXFAS100MG",
+  "premier|Maritime Gray|h100": "CTX100EMG",
+  "premier|Maritime Gray|h400": "CTC400PCMG",
+  "premier|Maritime Gray|h80": "CTC80PCMG",
+  "premier|Teak|c100": "CTC100LFPDT",
+  "premier|Teak|c300": "CTC300SFPDT",
   "premier|Teak|fas50": "CTXFAS100DT",
   "premier|Teak|h100": "CTX100EDT",
   "premier|Teak|h400": "CTC400PCDT",
   "premier|Teak|h80": "CTC80PCDT",
-  "prime|Cocoa|c100": "CTC100LFDC",
-  "prime|Cocoa|c300": "CTC300SFDC",
-  "prime|Cocoa|fas50": "CTXFAS100DC",
-  "prime|Cocoa|h80": "CTC80PCDC",
-  "prime|Gray|c100": "CTC100LFST",
-  "prime|Gray|c300": "CTC300SFST",
-  "prime|Gray|fas50": "CTXFAS100ST",
-  "prime|Gray|h80": "CTC80PCST",
-  "prime|Husk|c100": "CTC100LFCH",
-  "prime|Husk|c300": "CTC300SFCH",
-  "prime|Husk|fas50": "CTXFAS100CH",
-  "prime|Husk|h80": "CTC80PCCH",
+  "prime_and_premier|Dark Teak|c100": "CTC100LFPDT",
+  "prime_and_premier|Dark Teak|c300": "CTC300SFPDT",
+  "prime_and_premier|Gray|c100": "CTC100LFPMG",
+  "prime_and_premier|Gray|c300": "CTC300SFPMG",
+  "prime_and_premier|Maritime Gray|c100": "CTC100LFPMG",
+  "prime_and_premier|Maritime Gray|c300": "CTC300SFPMG",
+  "prime_and_premier|Teak|c100": "CTC100LFPDT",
+  "prime_and_premier|Teak|c300": "CTC300SFPDT",
+  "prime_plus|Cocoa|c100": "CTC100LFDC",
+  "prime_plus|Cocoa|c300": "CTC300SFDC",
+  "prime_plus|Cocoa|fas50": "CTXFAS100DC",
+  "prime_plus|Cocoa|h80": "CTC80PCDC",
+  "prime_plus|Coconut Husk|c100": "CTC100LFCH",
+  "prime_plus|Coconut Husk|c300": "CTC300SFCH",
+  "prime_plus|Coconut Husk|fas50": "CTXFAS100CH",
+  "prime_plus|Coconut Husk|h80": "CTC80PCCH",
+  "prime_plus|Dark Cocoa|c100": "CTC100LFDC",
+  "prime_plus|Dark Cocoa|c300": "CTC300SFDC",
+  "prime_plus|Dark Cocoa|fas50": "CTXFAS100DC",
+  "prime_plus|Dark Cocoa|h80": "CTC80PCDC",
+  "prime_plus|Gray|c100": "CTC100LFST",
+  "prime_plus|Gray|c300": "CTC300SFST",
+  "prime_plus|Gray|fas50": "CTXFAS100ST",
+  "prime_plus|Gray|h80": "CTC80PCST",
+  "prime_plus|Husk|c100": "CTC100LFCH",
+  "prime_plus|Husk|c300": "CTC300SFCH",
+  "prime_plus|Husk|fas50": "CTXFAS100CH",
+  "prime_plus|Husk|h80": "CTC80PCCH",
+  "prime_plus|Sea Salt Gray|c100": "CTC100LFST",
+  "prime_plus|Sea Salt Gray|c300": "CTC300SFST",
+  "prime_plus|Sea Salt Gray|fas50": "CTXFAS100ST",
+  "prime_plus|Sea Salt Gray|h80": "CTC80PCST",
+  "prime|Dark Teak|c100": "CTC100LFPDT",
+  "prime|Dark Teak|c300": "CTC300SFPDT",
+  "prime|Gray|c100": "CTC100LFPMG",
+  "prime|Gray|c300": "CTC300SFPMG",
+  "prime|Maritime Gray|c100": "CTC100LFPMG",
+  "prime|Maritime Gray|c300": "CTC300SFPMG",
   "prime|Teak|c100": "CTC100LFPDT",
   "prime|Teak|c300": "CTC300SFPDT",
+  "reserve|Antique Leather|c100": "CTC100LFAL",
+  "reserve|Antique Leather|c300": "CTC300SFAL",
+  "reserve|Antique Leather|fas50": "CTXFAS100AL",
+  "reserve|Antique Leather|h100": "CTX100RCAL",
+  "reserve|Antique Leather|h400": "CTC400PCAL",
+  "reserve|Antique Leather|h80": "CTC80PCAL",
   "reserve|Chestnut|c100": "CTC100LFRC",
   "reserve|Chestnut|c300": "CTC300SFRC",
   "reserve|Chestnut|fas50": "CTXFAS100RC",
   "reserve|Chestnut|h100": "CTX100RCRC",
   "reserve|Chestnut|h400": "CTC400PCRC",
   "reserve|Chestnut|h80": "CTC80PCRC",
+  "reserve|Dark Roast|c100": "CTC100LFDR",
+  "reserve|Dark Roast|c300": "CTC300SFDR",
+  "reserve|Dark Roast|fas50": "CTXFAS100DR",
+  "reserve|Dark Roast|h100": "CTX100RCDR",
+  "reserve|Dark Roast|h400": "CTC400PCDR",
+  "reserve|Dark Roast|h80": "CTC80PCDR",
   "reserve|Driftwood|c100": "CTC100LFDW",
   "reserve|Driftwood|c300": "CTC300SFDW",
   "reserve|Driftwood|fas50": "CTXFAS100DW",
@@ -3093,17 +3171,38 @@ const CORTEX_SKU_LOOKUP = {
   "reserve|Leather|h100": "CTX100RCAL",
   "reserve|Leather|h400": "CTC400PCAL",
   "reserve|Leather|h80": "CTC80PCAL",
+  "reserve|Reclaimed Chestnut|c100": "CTC100LFRC",
+  "reserve|Reclaimed Chestnut|c300": "CTC300SFRC",
+  "reserve|Reclaimed Chestnut|fas50": "CTXFAS100RC",
+  "reserve|Reclaimed Chestnut|h100": "CTX100RCRC",
+  "reserve|Reclaimed Chestnut|h400": "CTC400PCRC",
+  "reserve|Reclaimed Chestnut|h80": "CTC80PCRC",
   "reserve|Roast|c100": "CTC100LFDR",
   "reserve|Roast|c300": "CTC300SFDR",
   "reserve|Roast|fas50": "CTXFAS100DR",
   "reserve|Roast|h100": "CTX100RCDR",
   "reserve|Roast|h400": "CTC400PCDR",
   "reserve|Roast|h80": "CTC80PCDR",
-  "terrain|Oak|c100": "CTC100LFNW",
-  "terrain|Oak|c300": "CTC300SFNW",
-  "terrain|Oak|fas50": "CTXFAS100DO",
-  "terrain|Oak|h400": "CTC400PCNW",
-  "terrain|Oak|h80": "CTC80PCNW",
+  "terrain_plus|Dark Oak|c100": "CTC100LFDO",
+  "terrain_plus|Dark Oak|c300": "CTC300SFDO",
+  "terrain_plus|Dark Oak|fas50": "CTXFAS100WO",
+  "terrain_plus|Dark Oak|h400": "CTC400PCDO",
+  "terrain_plus|Dark Oak|h80": "CTC80PCDO",
+  "terrain_plus|Natural White Oak|c100": "CTC100LFNW",
+  "terrain_plus|Natural White Oak|c300": "CTC300SFNW",
+  "terrain_plus|Natural White Oak|fas50": "CTXFAS100DO",
+  "terrain_plus|Natural White Oak|h400": "CTC400PCNW",
+  "terrain_plus|Natural White Oak|h80": "CTC80PCNW",
+  "terrain_plus|Oak|c100": "CTC100LFNW",
+  "terrain_plus|Oak|c300": "CTC300SFNW",
+  "terrain_plus|Oak|fas50": "CTXFAS100DO",
+  "terrain_plus|Oak|h400": "CTC400PCNW",
+  "terrain_plus|Oak|h80": "CTC80PCNW",
+  "terrain_plus|Weathered Oak|c100": "CTC100LFWO",
+  "terrain_plus|Weathered Oak|c300": "CTC300SFWO",
+  "terrain_plus|Weathered Oak|fas50": "CTXFAS100NW",
+  "terrain_plus|Weathered Oak|h400": "CTC400PCWO",
+  "terrain_plus|Weathered Oak|h80": "CTC80PCWO",
   "vintage|Coastline|c100": "CTC100SFCS",
   "vintage|Coastline|c300": "CTC300SFCS",
   "vintage|Coastline|h100": "CTX100SFCS",
@@ -3120,10 +3219,14 @@ const CORTEX_SKU_LOOKUP = {
   "vintage|Dark Hickory|c300": "CTC300SFDH",
   "vintage|Dark Hickory|h100": "CTX100SFDH",
   "vintage|Dark Hickory|h300": "CTX300SFDH",
+  "vintage|Dark Hickory|h400": "CTC400PCDH",
+  "vintage|Dark Hickory|h80": "CTC80PCDH",
   "vintage|English Walnut|c100": "CTC100SFEW",
   "vintage|English Walnut|c300": "CTC300SFEW",
   "vintage|English Walnut|h100": "CTX100SFEW",
   "vintage|English Walnut|h300": "CTX300SFEW",
+  "vintage|English Walnut|h400": "CTC400PCEW",
+  "vintage|English Walnut|h80": "CTC80PCEW",
   "vintage|Hickory|h400": "CTC400PCDH",
   "vintage|Hickory|h80": "CTC80PCDH",
   "vintage|Mahogany|c100": "CTC100SFMH",
@@ -3139,7 +3242,9 @@ const CORTEX_SKU_LOOKUP = {
   "vintage|Weathered Teak|c100": "CTC100SFWT",
   "vintage|Weathered Teak|c300": "CTC300SFWT",
   "vintage|Weathered Teak|h100": "CTX100SFWT",
-  "vintage|Weathered Teak|h300": "CTX300SFWT"
+  "vintage|Weathered Teak|h300": "CTX300SFWT",
+  "vintage|Weathered Teak|h400": "CTC400PCWT",
+  "vintage|Weathered Teak|h80": "CTC80PCWT"
 };
 
 // TOPLoc SKU lookup: "scope|color|kind+size" -> SKU
@@ -3294,8 +3399,12 @@ const CATALOG = {
           colors: ["Brownstone", "Kona", "Slate Gray"],
           scalloped_bottom: false,
           profiles: {
-            sq_1x6:  { actual_w_in: 5.5,  thick_in: 1.0,  lengths_ft: [12, 16, 20], use: ["pf","breaker","stair","drink_rail"], sku_prefix: "ADB155" },
-            grv_1x6: { actual_w_in: 5.5,  thick_in: 1.0,  lengths_ft: [12, 16, 20], use: ["field"],                              sku_prefix: "AGB155" },
+            // sq_1x6: Kona only available in 16'/20' (no 12'); Brownstone/Slate Gray have all three
+            sq_1x6:  { actual_w_in: 5.5,  thick_in: 1.0,  lengths_ft: [12, 16, 20], use: ["pf","breaker","stair","drink_rail"], sku_prefix: "ADB155",
+                       lengths_by_color: { "Kona": [16, 20] } },
+            // grv_1x6 NOT available in Kona
+            grv_1x6: { actual_w_in: 5.5,  thick_in: 1.0,  lengths_ft: [12, 16, 20], use: ["field"],                              sku_prefix: "AGB155",
+                       colors_filter: ["Brownstone", "Slate Gray"] },
             sq_1x8:  { actual_w_in: 7.25, thick_in: 1.0,  lengths_ft: [16, 20],     use: ["pf","breaker","stair","drink_rail"], sku_prefix: "ADB1725", colors_filter: ["Brownstone","Slate Gray"] },
             max_2x6: { actual_w_in: 5.5,  thick_in: 1.5,  lengths_ft: [12, 16, 20], use: ["pf","breaker","stair","drink_rail"], sku_prefix: "ADB255",  colors_filter: ["Slate Gray"] },
             fascia:  { actual_w_in: 11.75, thick_in: 0.50, lengths_ft: [12],         use: ["fascia"],                            sku_prefix: "ADR511751" },
@@ -4217,49 +4326,81 @@ function countFascia({ P, W, attachment, stairs = [], fasciaLengthsFt = [12], fa
   return { totalFasciaLF, deckPerimLF, stairFasciaLF, bom };
 }
 
-function resolveDeckingProfile({ series, collection, use, widthOverrideIn, profileId }) {
+function resolveDeckingProfile({ series, collection, use, widthOverrideIn, profileId, color }) {
   const coll = CATALOG.decking?.[series]?.collections?.[collection];
   if (!coll) return null;
   const extras = { seriesKey: series, collectionKey: collection, collection: coll };
 
+  // Helper — does this profile support the given color? (and returns color-filtered lengths)
+  function _resolveProfile(id, p) {
+    // If profile has a colors_filter, the requested color must be in it (or unfiltered)
+    if (color && p.colors_filter && !p.colors_filter.includes(color)) return null;
+    // If profile has a per-color length list, use that; else use the default lengths_ft
+    let lengths = p.lengths_ft || [];
+    if (color && p.lengths_by_color && p.lengths_by_color[color]) {
+      lengths = p.lengths_by_color[color];
+    }
+    return { id, ...extras, ...p, lengths_ft: lengths };
+  }
+
   // If user explicitly picked a profile id (e.g., "grv_1x6", "max_2x6"), honor it
-  // when it supports the requested use; otherwise fall through to use-based selection.
+  // when it supports the requested use AND the color (if specified).
   if (profileId && coll.profiles[profileId]) {
     const p = coll.profiles[profileId];
-    if (p.use.includes(use)) return { id: profileId, ...extras, ...p };
-    // If profileId is grooved (field-only) but we need PF/stair, pick the matching SS variant
-    if (profileId.startsWith("grv_") && (use === "pf" || use === "breaker" || use === "stair" || use === "drink_rail")) {
+    if (p.use.includes(use)) {
+      const resolved = _resolveProfile(profileId, p);
+      if (resolved) return resolved;
+      // colors_filter excluded this color — fall through to alternates below
+    }
+    // grooved requested for PF/stair → matching SS variant (design choice)
+    // grooved requested for field but color excludes grv → fall back to SS face-fastened (e.g., Kona)
+    if (profileId.startsWith("grv_")) {
       const sqId = profileId.replace("grv_", "sq_");
       const sq = coll.profiles[sqId];
-      if (sq && sq.use.includes(use)) return { id: sqId, ...extras, ...sq };
+      if (sq) {
+        // standard fallback: sq supports the requested use
+        if (sq.use.includes(use)) {
+          const r = _resolveProfile(sqId, sq);
+          if (r) return r;
+        }
+        // field fallback: grv filtered out for this color, allow sq face-fastened
+        if (use === "field" && color && p.colors_filter && !p.colors_filter.includes(color)) {
+          const r = _resolveProfile(sqId, sq);
+          if (r) return { ...r, _faceScrewed: true };
+        }
+      }
     }
-    // If profileId is square (PF/breaker/stair) but we need field, pick the matching grooved variant
+    // square requested for field → matching grooved variant
     if (profileId.startsWith("sq_") && use === "field") {
       const grvId = profileId.replace("sq_", "grv_");
       const grv = coll.profiles[grvId];
-      if (grv && grv.use.includes(use)) return { id: grvId, ...extras, ...grv };
+      if (grv && grv.use.includes(use)) {
+        const r = _resolveProfile(grvId, grv);
+        if (r) return r;
+      }
     }
-    // MAX can be used as the field board (face-fastened with TOPLoc since no groove).
-    // Honor the explicit user selection — return MAX directly even if its `use` array
-    // doesn't include "field" in the catalog.
+    // MAX honored as field with face-fastening
     if (profileId === "max_2x6") {
-      return { id: "max_2x6", ...extras, ...p };
+      const r = _resolveProfile("max_2x6", p);
+      if (r) return r;
     }
   }
 
-  // Filter to use-capable profiles
-  const matches = Object.entries(coll.profiles).filter(([id, p]) => p.use.includes(use));
+  // Filter to use-capable AND color-supporting profiles
+  const matches = Object.entries(coll.profiles)
+    .filter(([id, p]) => p.use.includes(use))
+    .filter(([id, p]) => !color || !p.colors_filter || p.colors_filter.includes(color));
   if (!matches.length) return null;
 
   // Width-by-inches override (back-compat)
   if (widthOverrideIn) {
     const exact = matches.find(([id, p]) => p.actual_w_in === widthOverrideIn);
-    if (exact) return { id: exact[0], ...extras, ...exact[1] };
+    if (exact) return _resolveProfile(exact[0], exact[1]);
   }
   // Default: prefer 5.5" standard (not MAX), else first
   const default5 = matches.find(([id, p]) => p.actual_w_in === 5.5 && p.thick_in !== 1.5);
   const def = default5 || matches[0];
-  return { id: def[0], ...extras, ...def[1] };
+  return _resolveProfile(def[0], def[1]);
 }
 
 // Helper used by all decking count functions to construct a real TT SKU.
@@ -4529,6 +4670,14 @@ function validateRailing({ runs = [], deckingScalloped = false }) {
     // Vertical Cable 42 = residential only flag (not blocking)
     if (run.infill === "vert_cable" && run.height === 42) {
       errors.push(`Run ${i+1}: Vertical Cable @ 42" is residential-only`);
+    }
+    // Vertical Cable stair: only 6' lengths exist
+    if (run.infill === "vert_cable" && run.hasStair && run.sectionLengthFt && run.sectionLengthFt !== 6) {
+      errors.push(`Run ${i+1}: Vertical Cable stair panels only available in 6' (selected ${run.sectionLengthFt}')`);
+    }
+    // Horizontal Cable stair: only 6' lengths exist (TimberTech doesn't sell 8' Horizontal Cable stair kits)
+    if (run.infill === "horiz_cable" && run.hasStair && run.sectionLengthFt && run.sectionLengthFt !== 6) {
+      errors.push(`Run ${i+1}: Horizontal Cable stair kits only available in 6' (selected ${run.sectionLengthFt}')`);
     }
     // 2x2 OTP requires 18' top rail / straight only
     if (run.postSize && run.postSize.startsWith("2x2") && run.topRail !== "bulk_18") {
@@ -5001,6 +5150,10 @@ function _realFastenerSKU(sys, packName, color) {
         if (CORTEX_SKU_LOOKUP[k]) return CORTEX_SKU_LOOKUP[k];
       }
     }
+    // Cortex missing for this collection (e.g., Terrain non-plus has no Cortex SKUs) → fall back to CONCEALoc
+    if (packName === "100")       return "CLOCFAST";
+    if (packName === "500_pail")  return "CLOCGUNPAIL";
+    if (packName === "1000")      return "CLOCBULK";
   }
 
   // TOPLoc — map TT color to nearest TOPLoc shade, then look up by scope+shade+size
@@ -5089,27 +5242,29 @@ function rollupBOM(input) {
   const resurface = !!input.resurfaceExisting;
   const reinforce = !!input.reinforceJoists;
 
-  // Resolve profiles — pass user's chosen profileId so MAX vs standard are distinct
+  // Resolve profiles — pass user's chosen profileId AND color so per-color filters apply
+  const mainColorForResolve = input.main?.color;
   const mainProfile = resolveDeckingProfile({
     series: input.main.series, collection: input.main.collection,
-    use: "field", profileId: input.main.profileId
+    use: "field", profileId: input.main.profileId, color: mainColorForResolve
   });
-  // For PF/breaker: if main is MAX, PF/breaker should also use MAX (when matching).
-  // Otherwise default to SS 1x6 standard for face-screw installations.
+  const pfColorR = input.pf?.sameAsMain ? mainColorForResolve : input.pf?.color;
   const pfProfile = input.pf?.sameAsMain ? (mainProfile && mainProfile.id === "max_2x6"
-      ? resolveDeckingProfile({ series: input.main.series, collection: input.main.collection, use: "pf", profileId: "max_2x6" })
-      : resolveDeckingProfile({ series: input.main.series, collection: input.main.collection, use: "pf" }))
-    : resolveDeckingProfile({ series: input.pf.series, collection: input.pf.collection, use: "pf", widthOverrideIn: input.pf.widthIn });
+      ? resolveDeckingProfile({ series: input.main.series, collection: input.main.collection, use: "pf", profileId: "max_2x6", color: mainColorForResolve })
+      : resolveDeckingProfile({ series: input.main.series, collection: input.main.collection, use: "pf", color: mainColorForResolve }))
+    : resolveDeckingProfile({ series: input.pf.series, collection: input.pf.collection, use: "pf", widthOverrideIn: input.pf.widthIn, color: pfColorR });
+  const brkColorR = input.breakers?.sameAsMain ? mainColorForResolve : input.breakers?.color;
   const brkProfile = input.breakers?.sameAsMain ? (mainProfile && mainProfile.id === "max_2x6"
-      ? resolveDeckingProfile({ series: input.main.series, collection: input.main.collection, use: "breaker", profileId: "max_2x6" })
-      : resolveDeckingProfile({ series: input.main.series, collection: input.main.collection, use: "breaker" }))
-    : resolveDeckingProfile({ series: input.breakers.series, collection: input.breakers.collection, use: "breaker", widthOverrideIn: input.breakers.widthIn });
+      ? resolveDeckingProfile({ series: input.main.series, collection: input.main.collection, use: "breaker", profileId: "max_2x6", color: mainColorForResolve })
+      : resolveDeckingProfile({ series: input.main.series, collection: input.main.collection, use: "breaker", color: mainColorForResolve }))
+    : resolveDeckingProfile({ series: input.breakers.series, collection: input.breakers.collection, use: "breaker", widthOverrideIn: input.breakers.widthIn, color: brkColorR });
+  const fasciaColorR = input.fascia?.sameAsMain ? mainColorForResolve : input.fascia?.color;
   const fasciaProfile = input.fascia?.sameAsMain ?
-    resolveDeckingProfile({ series: input.main.series, collection: input.main.collection, use: "fascia" }) :
-    resolveDeckingProfile({ series: input.fascia.series, collection: input.fascia.collection, use: "fascia" });
+    resolveDeckingProfile({ series: input.main.series, collection: input.main.collection, use: "fascia", color: mainColorForResolve }) :
+    resolveDeckingProfile({ series: input.fascia.series, collection: input.fascia.collection, use: "fascia", color: fasciaColorR });
   const riserProfile = input.fascia?.sameAsMain ?
-    resolveDeckingProfile({ series: input.main.series, collection: input.main.collection, use: "riser" }) :
-    resolveDeckingProfile({ series: input.fascia.series, collection: input.fascia.collection, use: "riser" });
+    resolveDeckingProfile({ series: input.main.series, collection: input.main.collection, use: "riser", color: mainColorForResolve }) :
+    resolveDeckingProfile({ series: input.fascia.series, collection: input.fascia.collection, use: "riser", color: fasciaColorR });
 
   // Joist sizing — always compute so we know dimensions, even if not adding to BOM
   // For resurface or reinforce, this resolves the size to MATCH (existing joist size override allowed)
