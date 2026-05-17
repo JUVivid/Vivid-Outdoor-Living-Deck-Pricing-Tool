@@ -7,27 +7,33 @@
   <style>
 /* ════════════════════════════════════════════════════════════
    Vivid Outdoor Living — Deck Takeoff Tool
-   Black base • Gold accent • Parchment for warmth
+   Editorial-luxury aesthetic: obsidian black · bone parchment · refined gold
+   Typography: Cormorant Garamond (display) + Jost (interface)
    ════════════════════════════════════════════════════════════ */
 
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Jost:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
 
 :root {
-  --black:           #0A0A0A;
-  --black-soft:      #1A1A1A;
-  --gold:            #C8913A;
-  --gold-bright:     #D4A853;
-  --gold-muted:      #8B5A2B;
-  --parchment:       #F5ECD7;
-  --parchment-soft:  #EDE0C4;
-  --fog:             #F9F5EE;
-  --text-on-black:   var(--parchment);
-  --text-on-light:   var(--black);
-  --error:           #8B2020;
-  --success:         #4A7A4A;
-  --shadow:          rgba(0,0,0,0.5);
-  --r:               6px;
-  --r-card:          10px;
+  --black:        #0a0908;
+  --charcoal:     #141312;
+  --char-2:       #1c1a18;
+  --char-3:       #24211d;
+  --bone:         #f4ede0;
+  --bone-soft:    #d8cfb9;
+  --bone-dim:     #9a9183;
+  --bone-mute:    #6b655b;
+  --gold:         #c9a961;
+  --gold-bright:  #d9bd7a;
+  --gold-deep:    #8e7438;
+  --line:         rgba(201, 169, 97, 0.22);
+  --line-strong:  rgba(201, 169, 97, 0.45);
+  --line-soft:    rgba(244, 237, 224, 0.08);
+  --line-faint:   rgba(244, 237, 224, 0.04);
+  --error:        #b8443c;
+  --success:      #6b8f5a;
+  --serif:        'Cormorant Garamond', 'Times New Roman', serif;
+  --sans:         'Jost', system-ui, -apple-system, sans-serif;
+  --mono:         'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -35,678 +41,958 @@
 html, body { height: 100%; }
 
 body {
-  background: var(--black);
+  background-color: #ede0c4;
   background-image:
-    radial-gradient(ellipse at 20% 0%, rgba(200, 145, 58, 0.12) 0%, transparent 60%),
-    radial-gradient(ellipse at 80% 100%, rgba(200, 145, 58, 0.08) 0%, transparent 50%);
-  font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
-  color: var(--text-on-black);
+    /* warm tonal variation across the page */
+    radial-gradient(ellipse at 18% 22%, rgba(248, 240, 218, 0.7), transparent 55%),
+    radial-gradient(ellipse at 82% 78%, rgba(218, 198, 158, 0.45), transparent 60%),
+    radial-gradient(ellipse at 50% 50%, rgba(243, 232, 208, 0.4), transparent 70%);
+  background-attachment: fixed;
+  color: #1a1410;
+  font-family: var(--sans);
+  font-weight: 400;
+  font-size: 15px;
+  line-height: 1.55;
   min-height: 100vh;
+  overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Paper fiber grain — kept very subtle so it doesn't break text legibility */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 100;
+  opacity: 0.07;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.18  0 0 0 0 0.13  0 0 0 0 0.06  0 0 0 0.85 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+}
+
+/* The multiply grain above reads strongly on parchment and quietly on dark
+   surfaces — no second layer needed. */
+
+/* ── Parchment-theme scopes ─────────────────────────────────
+   Header and right-pane Project Summary keep the obsidian/gold theme by
+   explicitly redeclaring tokens. Form pane, tabs, and Material List inherit
+   the parchment palette below — semantic vars (--bone, --line, etc.) are
+   redefined in scope so existing component rules just work. */
+
+.tabs, .form-pane, .materials-view {
+  --bone:       #1a1410;
+  --bone-soft:  #3d3024;
+  --bone-dim:   #6b5a40;
+  --bone-mute:  #8c7a5b;
+  --gold:       #8e7438;
+  --gold-bright:#a98a44;
+  --gold-deep:  #6e5520;
+  --line:       rgba(108, 84, 36, 0.32);
+  --line-strong:rgba(108, 84, 36, 0.55);
+  --line-soft:  rgba(40, 30, 18, 0.14);
+  --line-faint: rgba(40, 30, 18, 0.07);
+  color: #1a1410;
+}
+
+/* Header & right-pane explicitly stay dark — re-bind tokens locally */
+header, .bom-pane {
+  --bone:       #f4ede0;
+  --bone-soft:  #d8cfb9;
+  --bone-dim:   #9a9183;
+  --bone-mute:  #6b655b;
+  --gold:       #c9a961;
+  --gold-bright:#d9bd7a;
+  --gold-deep:  #8e7438;
+  --line:       rgba(201, 169, 97, 0.22);
+  --line-strong:rgba(201, 169, 97, 0.45);
+  --line-soft:  rgba(244, 237, 224, 0.08);
+  --line-faint: rgba(244, 237, 224, 0.04);
+  color: #f4ede0;
 }
 
 /* ── Header ─────────────────────────────────────────────────── */
 header {
-  background: var(--black-soft);
-  border-bottom: 3px solid var(--gold);
-  padding: 18px 24px;
-  display: flex;
-  align-items: center;
-  gap: 16px;
   position: sticky;
   top: 0;
-  z-index: 100;
-  box-shadow: 0 4px 24px var(--shadow);
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 22px 40px;
+  background: rgba(10, 9, 8, 0.92);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--line-soft);
 }
 
 .logo {
-  width: 44px; height: 44px;
-  background: var(--gold);
-  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
-  display: flex; align-items: center; justify-content: center;
+  width: 46px;
+  height: 46px;
+  border: 1px solid var(--gold);
+  background: var(--bone);
+  display: flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
+  overflow: hidden;
+  text-decoration: none;
+  transition: transform 0.6s ease;
+}
+.logo:hover { transform: rotate(-4deg); }
+.logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 .logo span {
-  color: var(--black);
-  font-family: 'Playfair Display', serif;
-  font-weight: 900;
-  font-size: 18px;
+  color: var(--gold-deep);
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 500;
+  font-size: 26px;
+  line-height: 1;
+}
+
+.logo-wordmark {
+  display: flex;
+  flex-direction: column;
+  line-height: 1;
 }
 
 header h1 {
-  font-family: 'Playfair Display', serif;
+  font-family: var(--serif);
+  font-weight: 500;
   font-size: 22px;
-  color: var(--parchment);
-  letter-spacing: 0.5px;
-  font-weight: 700;
-}
-header p {
-  font-size: 11px;
-  color: var(--gold-bright);
-  font-family: 'DM Mono', monospace;
-  letter-spacing: 1.5px;
+  letter-spacing: 0.32em;
   text-transform: uppercase;
-  margin-top: 2px;
+  color: var(--bone);
+  line-height: 1;
+}
+header h1::first-letter { color: var(--gold); font-style: italic; }
+header p {
+  margin-top: 6px;
+  font-size: 10px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--gold);
+  font-weight: 500;
 }
 .hdr-r { margin-left: auto; }
+
 .btn-reset {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 22px;
+  border: 1px solid var(--line);
   background: transparent;
-  border: 1px solid var(--gold-muted);
-  color: var(--gold-bright);
-  padding: 8px 18px;
-  border-radius: var(--r);
-  font-family: 'DM Mono', monospace;
+  color: var(--bone);
+  font-family: var(--sans);
   font-size: 11px;
-  letter-spacing: 1px;
+  font-weight: 500;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
   cursor: pointer;
-  transition: all 0.2s;
-  min-height: 44px;
+  transition: all 0.35s ease;
+  min-height: 42px;
+  position: relative;
+  overflow: hidden;
 }
-.btn-reset:hover { background: var(--gold-muted); color: var(--parchment); }
+.btn-reset:hover {
+  border-color: var(--gold);
+  color: var(--gold);
+}
 
 /* ── Tabs ───────────────────────────────────────────────────── */
 .tabs {
-  background: var(--black-soft);
-  border-bottom: 1px solid rgba(200, 145, 58, 0.25);
-  padding: 0 24px;
   display: flex;
-  gap: 4px;
+  gap: 0;
+  padding: 0 40px;
+  background: rgba(237, 224, 196, 0.86);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--line);
   position: sticky;
-  top: 80px;
-  z-index: 90;
+  top: 90px;
+  z-index: 40;
 }
 .tab {
+  position: relative;
   background: transparent;
   border: none;
-  border-bottom: 3px solid transparent;
-  color: var(--gold-bright);
-  padding: 14px 22px;
-  font-family: 'DM Mono', monospace;
+  color: var(--bone-dim);
+  font-family: var(--sans);
   font-size: 12px;
-  letter-spacing: 1.5px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
+  padding: 20px 26px;
   cursor: pointer;
-  transition: color 0.2s, border-color 0.2s, background 0.2s;
-  min-height: 44px;
+  transition: color 0.3s ease;
 }
-.tab:hover { color: var(--parchment); background: rgba(200, 145, 58, 0.06); }
-.tab.active {
-  color: var(--gold);
-  border-bottom-color: var(--gold);
-  font-weight: 700;
+.tab::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 28px;
+  right: 28px;
+  height: 1px;
+  background: var(--gold);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.4s ease;
 }
+.tab:hover { color: var(--bone); }
+.tab.active { color: var(--gold); }
+.tab.active::after { transform: scaleX(1); }
 
 .tab-pane { display: none; }
 .tab-pane.active { display: block; }
 
-/* ── Main app layout ────────────────────────────────────────── */
+/* ── App layout ─────────────────────────────────────────────── */
 .app {
   display: grid;
-  grid-template-columns: 1fr;
-  min-height: calc(100vh - 130px);
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+  gap: 0;
+  min-height: calc(100vh - 145px);
 }
 
-@media (min-width: 768px) {
-  .app { grid-template-columns: 1fr 420px; }
+.form-pane {
+  padding: 40px 40px 80px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  border-right: 1px solid var(--line-soft);
 }
 
-/* Materials view — full-width when on its own tab */
+.bom-pane {
+  padding: 48px 48px 96px;
+  background: var(--charcoal);
+  border-left: 1px solid var(--line-soft);
+  position: sticky;
+  top: 145px;
+  align-self: start;
+  max-height: calc(100vh - 145px);
+  overflow-y: auto;
+}
+.bom-pane::-webkit-scrollbar { width: 6px; }
+.bom-pane::-webkit-scrollbar-track { background: transparent; }
+.bom-pane::-webkit-scrollbar-thumb { background: var(--line); border-radius: 3px; }
+
+/* Materials tab */
 .materials-view {
-  max-width: 960px;
+  padding: 48px 56px 96px;
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 32px 24px;
-  background: var(--black-soft);
-  background-image: linear-gradient(160deg, var(--black-soft) 0%, var(--black) 100%);
-  min-height: calc(100vh - 130px);
 }
 .materials-header {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
-  gap: 24px;
-  margin-bottom: 24px;
-  padding-bottom: 16px;
-  border-bottom: 1px solid rgba(200, 145, 58, 0.2);
+  align-items: flex-end;
+  gap: 32px;
   flex-wrap: wrap;
+  padding-bottom: 28px;
+  margin-bottom: 40px;
+  border-bottom: 1px solid var(--line);
 }
-.materials-header .btn-actions {
-  margin-top: 0;
-  min-width: 220px;
-}
-.ml-controls {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  flex-wrap: wrap;
-}
+.ml-controls { display: flex; align-items: flex-end; gap: 18px; flex-wrap: wrap; }
 .ml-tax {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
   font-size: 11px;
-  font-family: 'DM Mono', monospace;
+  font-weight: 600;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
-  letter-spacing: 1px;
-  color: var(--gold-bright);
+  color: var(--bone-soft);
 }
+.ml-tax span { font-weight: 400; }
 .ml-tax input {
-  width: 80px;
-  padding: 8px 10px;
-  background: var(--fog);
-  color: var(--black);
-  border: 1.5px solid var(--parchment-soft);
-  border-radius: var(--r);
-  font-family: 'DM Mono', monospace;
+  width: 90px;
+  padding: 10px 12px;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--line);
+  color: var(--bone);
+  font-family: var(--mono);
   font-size: 14px;
-  text-align: right;
+  letter-spacing: 0.05em;
+  transition: border-color 0.3s;
 }
-.ml-tax input:focus { outline: none; border-color: var(--gold); }
-@media (max-width: 600px) {
-  .materials-view { padding: 20px 16px; }
-  .materials-header { flex-direction: column; }
-  .materials-header .btn-actions { min-width: 100%; }
-  .ml-controls { width: 100%; justify-content: space-between; }
-}
+.ml-tax input:focus { outline: none; border-bottom-color: var(--gold); }
 
-.form-pane {
-  padding: 24px;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  overflow-y: auto;
-}
-
-.bom-pane {
-  background: var(--black-soft);
-  background-image: linear-gradient(160deg, var(--black-soft) 0%, var(--black) 100%);
-  padding: 24px;
-  display: flex;
-  flex-direction: column;
-}
-
-@media (min-width: 768px) {
-  .bom-pane {
-    position: sticky;
-    top: 130px;
-    height: calc(100vh - 130px);
-    overflow-y: auto;
-  }
-}
-
-/* ── Cards ──────────────────────────────────────────────────── */
+/* ── Cards — framed category boxes ─────────────────────────── */
 .card {
-  background: var(--parchment);
-  border-radius: var(--r-card);
-  border: 1px solid var(--parchment-soft);
-  box-shadow: 0 4px 16px var(--shadow);
-  overflow: hidden;
-  color: var(--text-on-light);
+  border: 1px solid var(--line-strong);
+  background: rgba(252, 245, 228, 0.55);
+  padding: 24px 28px 28px;
+  position: relative;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+  box-shadow:
+    0 1px 0 rgba(40, 30, 18, 0.05),
+    0 2px 14px rgba(40, 30, 18, 0.045);
+}
+.card:hover {
+  border-color: var(--gold);
+  box-shadow:
+    0 1px 0 rgba(40, 30, 18, 0.07),
+    0 4px 22px rgba(40, 30, 18, 0.07);
+}
+/* The gold corner accent — subtle "this is a section" marker */
+.card::before {
+  content: '';
+  position: absolute;
+  top: -1px;
+  left: -1px;
+  width: 36px;
+  height: 2px;
+  background: var(--gold);
+  pointer-events: none;
 }
 
 .card-header {
-  background: var(--black-soft);
-  padding: 14px 20px;
-  display: flex;
+  display: grid;
+  grid-template-columns: 48px 1fr;
   align-items: center;
-  gap: 12px;
+  gap: 18px;
+  padding-bottom: 16px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid var(--line);
 }
 .step-num {
-  width: 28px; height: 28px;
-  background: var(--gold);
-  border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  font-family: 'Playfair Display', serif;
-  font-weight: 700;
-  font-size: 14px;
-  color: var(--black);
-  flex-shrink: 0;
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 400;
+  font-size: 36px;
+  color: var(--gold);
+  line-height: 1;
+  text-align: center;
 }
 .card-header h2 {
-  font-family: 'Playfair Display', serif;
-  font-size: 17px;
-  color: var(--parchment);
-  font-weight: 400;
+  font-family: var(--serif);
+  font-weight: 500;
+  font-size: 24px;
+  line-height: 1.1;
+  color: var(--bone);
+  letter-spacing: -0.005em;
 }
 .card-body {
-  padding: 20px;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 18px;
+  padding-left: 0;
 }
 
-/* ── Form rows ──────────────────────────────────────────────── */
-.row { display: grid; grid-template-columns: 1fr; gap: 12px; }
-@media (min-width: 480px) {
-  .row.r2 { grid-template-columns: 1fr 1fr; }
-  .row.r3 { grid-template-columns: 1fr 1fr 1fr; }
-}
+/* ── Form fields ────────────────────────────────────────────── */
+.row { display: grid; grid-template-columns: 1fr; gap: 16px; }
+.row.r2 { grid-template-columns: 1fr 1fr; }
+.row.r3 { grid-template-columns: repeat(3, 1fr); }
 
-.field { display: flex; flex-direction: column; gap: 6px; }
+.field { display: flex; flex-direction: column; gap: 8px; }
 .field label {
-  font-size: 11px;
-  font-weight: 700;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  letter-spacing: 1px;
-  color: var(--gold-muted);
+  color: var(--bone-soft);
 }
 .field label em {
-  font-weight: 400;
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 13px;
+  letter-spacing: 0.04em;
   text-transform: none;
-  font-style: normal;
-  opacity: 0.7;
-  font-size: 10px;
+  color: var(--gold);
+  margin-left: 4px;
+  font-weight: 400;
 }
-
 .field input, .field select {
-  width: 100%;
-  padding: 11px 14px;
-  border: 1.5px solid var(--parchment-soft);
-  border-radius: var(--r);
-  font-family: 'DM Sans', sans-serif;
+  padding: 12px 0;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--line);
+  color: var(--bone);
+  font-family: var(--sans);
   font-size: 15px;
-  color: var(--black);
-  background: var(--fog);
-  -webkit-appearance: none;
-  appearance: none;
+  font-weight: 500;
+  letter-spacing: 0.005em;
+  transition: border-color 0.35s ease;
   min-height: 44px;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  width: 100%;
 }
 .field select {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238B5A2B' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12' fill='none' stroke='%238e7438' stroke-width='1.5'><path d='M2 4l4 4 4-4'/></svg>");
   background-repeat: no-repeat;
-  background-position: right 14px center;
-  padding-right: 36px;
+  background-position: right 4px center;
+  padding-right: 24px;
   cursor: pointer;
 }
+/* Dark-context override: brighter gold chevron */
+.bom-pane .field select {
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12' fill='none' stroke='%23c9a961' stroke-width='1.5'><path d='M2 4l4 4 4-4'/></svg>");
+}
+.field select option {
+  background: #f4ede0;
+  color: #1a1410;
+  font-family: var(--sans);
+}
+.bom-pane .field select option { background: var(--charcoal); color: var(--bone); }
 .field input:focus, .field select:focus {
   outline: none;
-  border-color: var(--gold);
-  box-shadow: 0 0 0 3px rgba(200, 145, 58, 0.18);
+  border-bottom-color: var(--gold);
 }
+.field input::placeholder { color: var(--bone-mute); font-weight: 300; }
+
 .field .computed {
-  background: var(--parchment-soft);
-  border-radius: var(--r);
-  padding: 11px 14px;
-  font-family: 'DM Mono', monospace;
-  font-size: 12px;
-  color: var(--gold-muted);
-  font-weight: 500;
-  line-height: 1.5;
+  padding: 12px 0;
+  font-family: var(--serif);
+  font-size: 22px;
+  font-weight: 400;
+  color: var(--gold);
+  border-bottom: 1px dashed var(--line);
   min-height: 44px;
-  display: flex;
-  align-items: center;
+  letter-spacing: -0.005em;
 }
 
-/* ── Toggle (match main deck) ───────────────────────────────── */
+/* ── Toggle rows ────────────────────────────────────────────── */
 .toggle-row {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 13px;
-  color: var(--gold-muted);
+  gap: 14px;
+  padding: 6px 0;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--bone-soft);
   cursor: pointer;
+  letter-spacing: 0.01em;
+  transition: color 0.2s;
+}
+.toggle-row:hover { color: var(--bone); }
+.toggle-row em {
+  font-family: var(--serif);
+  font-style: italic;
+  color: var(--gold);
+  font-size: 13px;
+  margin-left: 4px;
 }
 .toggle-row input[type="checkbox"] {
-  width: 18px; height: 18px;
-  accent-color: var(--gold);
+  appearance: none;
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border: 1px solid var(--line-strong);
+  background: transparent;
   cursor: pointer;
+  display: grid;
+  place-items: center;
+  transition: all 0.25s;
+  flex-shrink: 0;
+}
+.toggle-row input[type="checkbox"]:checked {
+  background: var(--gold);
+  border-color: var(--gold);
+}
+.toggle-row input[type="checkbox"]:checked::after {
+  content: '';
+  width: 9px;
+  height: 5px;
+  border-left: 1.5px solid var(--black);
+  border-bottom: 1.5px solid var(--black);
+  transform: translateY(-1px) rotate(-45deg);
 }
 
-/* ── BOM panel ──────────────────────────────────────────────── */
-.bom-title {
-  font-family: 'Playfair Display', serif;
-  font-size: 22px;
-  color: var(--parchment);
-  margin-bottom: 4px;
-}
-.bom-sub {
-  font-size: 11px;
-  color: var(--gold-bright);
-  font-family: 'DM Mono', monospace;
-  letter-spacing: 1.5px;
+/* ── Buttons ────────────────────────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  padding: 13px 24px;
+  border: 1px solid var(--gold);
+  color: var(--bone);
+  background: transparent;
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
-  margin-bottom: 20px;
+  cursor: pointer;
+  transition: all 0.4s ease;
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+  text-decoration: none;
+  min-height: 44px;
 }
+.btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--gold);
+  transform: translateX(-100%);
+  transition: transform 0.5s ease;
+  z-index: -1;
+}
+.btn:hover::before { transform: translateX(0); }
+.btn:hover { color: var(--black); }
+.btn.primary {
+  background: var(--gold);
+  color: var(--black);
+  border-color: var(--gold);
+}
+.btn.primary::before { background: var(--bone); }
+.btn.primary:hover { color: var(--black); }
 
-.bom-group { margin-bottom: 18px; }
-.bom-group-label {
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 1.5px;
+/* In-card buttons feel lighter */
+.card-body .btn {
+  border-color: var(--line-strong);
   color: var(--gold);
-  font-family: 'DM Mono', monospace;
-  border-bottom: 1px solid rgba(200, 145, 58, 0.25);
-  padding-bottom: 5px;
+  font-size: 12px;
+  padding: 12px 22px;
+}
+.card-body .btn::before { background: var(--gold); }
+.card-body .btn:hover { color: var(--black); }
+
+.btn-actions { display: flex; gap: 14px; flex-wrap: wrap; }
+.materials-header .btn-actions { display: flex !important; }
+
+/* ── Badges ─────────────────────────────────────────────────── */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  border-left: 2px solid;
+  background: rgba(0, 0, 0, 0.025);
+  color: var(--bone-soft);
+  line-height: 1.5;
+}
+.badge.info { border-left-color: var(--gold); color: var(--bone-soft); }
+.badge.warn { border-left-color: var(--error); color: #e89e98; background: rgba(184, 68, 60, 0.05); }
+.badge.ok   { border-left-color: var(--success); color: #a3c094; background: rgba(107, 143, 90, 0.05); }
+
+/* ── BOM (Material List) ────────────────────────────────────── */
+.bom-title {
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: 36px;
+  line-height: 1;
+  color: var(--bone);
+  letter-spacing: -0.01em;
+}
+.bom-title em { font-style: italic; color: var(--gold); }
+.bom-sub {
+  margin-top: 8px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+.bom-group { margin-bottom: 32px; }
+.bom-group-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 18px 0 14px;
   margin-bottom: 8px;
+  border-bottom: 1px solid var(--line);
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: 22px;
+  color: var(--bone);
+  letter-spacing: -0.005em;
+}
+.bom-group-label .group-subtotal {
+  font-family: var(--mono);
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--gold);
+  letter-spacing: 0.04em;
+}
+
+.bom-line {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 110px 110px;
+  gap: 18px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--line-faint);
+  align-items: baseline;
+  transition: background 0.3s;
+}
+.bom-line:hover { background: rgba(201, 169, 97, 0.03); }
+.bom-line .desc {
+  font-size: 14px;
+  color: var(--bone);
+  font-weight: 500;
+  line-height: 1.4;
+}
+.bom-line .sku {
+  display: block;
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--bone-mute);
+  letter-spacing: 0.05em;
+  margin-top: 4px;
+  text-transform: uppercase;
+}
+.bom-line .qty {
+  font-family: var(--mono);
+  font-size: 14px;
+  color: var(--bone-soft);
+  text-align: right;
+  letter-spacing: 0.03em;
+  font-weight: 500;
+}
+.bom-line .qty .raw {
+  display: block;
+  font-size: 11px;
+  color: var(--bone-mute);
+  margin-top: 2px;
+  font-style: italic;
+  font-weight: 400;
+}
+.bom-line .price {
+  font-family: var(--mono);
+  font-size: 14px;
+  color: var(--bone);
+  text-align: right;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+.bom-line .price.no-price { color: var(--bone-mute); opacity: 0.5; }
+.bom-line .price .unit-price {
+  display: block;
+  font-size: 10px;
+  font-weight: 400;
+  color: var(--bone-mute);
+  margin-top: 2px;
+  font-style: italic;
+}
+
+.bom-total {
+  margin-top: 36px;
+  padding: 28px 0 0;
+  border-top: 1px solid var(--gold);
   display: flex;
   justify-content: space-between;
   align-items: baseline;
 }
-.bom-group-label .group-subtotal {
-  font-size: 12px;
-  color: var(--gold-bright);
-  font-weight: 700;
-}
-.bom-line {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  padding: 5px 0;
-  gap: 12px;
-}
-.bom-line .desc {
-  font-size: 13px;
-  color: var(--parchment);
-  flex: 1;
-  line-height: 1.4;
-}
-.bom-line .sku {
-  font-family: 'DM Mono', monospace;
-  font-size: 10px;
-  color: var(--gold-bright);
-  opacity: 0.7;
-  display: block;
-  margin-top: 2px;
-}
-.bom-line .qty {
-  font-family: 'DM Mono', monospace;
-  font-size: 13px;
-  color: var(--gold);
-  white-space: nowrap;
-  font-weight: 500;
-}
-.bom-line .qty .raw {
-  font-size: 10px;
-  opacity: 0.55;
-  display: block;
-  text-align: right;
-  font-weight: 400;
-}
-.bom-line .price {
-  font-family: 'DM Mono', monospace;
-  font-size: 13px;
-  color: var(--parchment);
-  white-space: nowrap;
-  font-weight: 500;
-  min-width: 90px;
-  text-align: right;
-}
-.bom-line .price.no-price { color: var(--gold-muted); opacity: 0.6; }
-.bom-line .price .unit-price {
-  font-size: 10px;
-  opacity: 0.55;
-  display: block;
-  text-align: right;
-  font-weight: 400;
-  color: var(--gold-bright);
-}
-
-/* Grand total */
-.bom-total {
-  margin-top: 24px;
-  padding: 16px 20px;
-  background: var(--gold);
-  border-radius: var(--r-card);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  box-shadow: 0 4px 16px rgba(200, 145, 58, 0.2);
-}
 .bom-total-label {
-  font-family: 'Playfair Display', serif;
-  font-size: 15px;
-  color: var(--black);
-  font-weight: 700;
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 18px;
+  color: var(--bone);
+  letter-spacing: 0.04em;
 }
 .bom-total-value {
-  font-family: 'DM Mono', monospace;
-  font-size: 24px;
-  color: var(--black);
-  font-weight: 700;
-  letter-spacing: -0.5px;
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: 38px;
+  color: var(--gold);
+  letter-spacing: -0.01em;
 }
 .bom-total-note {
-  margin-top: 8px;
-  font-size: 11px;
-  color: var(--gold-bright);
-  font-style: italic;
-  text-align: center;
+  display: block;
+  margin-top: 6px;
+  text-align: right;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--bone-mute);
+  font-weight: 600;
 }
 
-/* ── Project Summary cards (Build tab right pane) ───────────── */
+/* ── Project Summary (right pane) ───────────────────────────── */
 .ps-card {
-  background: rgba(0,0,0,0.25);
-  border: 1px solid rgba(200, 145, 58, 0.18);
-  border-radius: var(--r-card);
-  padding: 14px 16px;
-  margin-bottom: 12px;
+  padding: 24px 0 28px;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 4px;
 }
+.ps-card:first-of-type { padding-top: 0; }
 .ps-card-header {
   display: flex;
   justify-content: space-between;
   align-items: baseline;
-  font-family: 'DM Mono', monospace;
-  font-size: 12px;
-  letter-spacing: 1.5px;
-  text-transform: uppercase;
+  margin-bottom: 14px;
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 18px;
+  color: var(--bone);
+}
+.ps-card-header span:last-child {
+  font-style: normal;
+  font-family: var(--mono);
+  font-size: 13px;
   color: var(--gold);
-  border-bottom: 1px solid rgba(200, 145, 58, 0.18);
-  padding-bottom: 8px;
-  margin-bottom: 10px;
+  letter-spacing: 0.04em;
 }
 .ps-subtotal {
-  font-family: 'DM Mono', monospace;
-  font-size: 16px;
-  color: var(--gold-bright);
-  font-weight: 700;
-  letter-spacing: 0;
-}
-.ps-items {
+  font-family: var(--serif);
+  font-size: 32px;
+  font-weight: 400;
+  color: var(--gold);
+  letter-spacing: -0.01em;
+  line-height: 1;
   margin-bottom: 10px;
 }
-.ps-item {
-  font-size: 12px;
-  color: var(--parchment);
-  padding: 2px 0;
-  line-height: 1.45;
+.ps-items, .ps-breakdown { display: flex; flex-direction: column; gap: 7px; margin-top: 12px; }
+.ps-item, .ps-pw-row, .ps-rollup-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 13px;
+  color: var(--bone-soft);
+  font-weight: 400;
+  line-height: 1.5;
 }
 .ps-item .ps-sub {
   font-size: 11px;
-  opacity: 0.7;
-  margin-left: 12px;
-}
-.ps-breakdown {
-  border-top: 1px dashed rgba(200, 145, 58, 0.15);
-  padding-top: 6px;
-}
-.ps-pw-row, .ps-rollup-row {
-  display: flex;
-  justify-content: space-between;
-  padding: 3px 0;
-  font-size: 12px;
-  color: var(--parchment);
-  font-family: 'DM Mono', monospace;
+  color: var(--bone-mute);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-top: 2px;
+  font-weight: 500;
 }
 .ps-pw-row span:last-child, .ps-rollup-row span:last-child {
-  color: var(--gold-bright);
-}
-.ps-pw-total {
-  display: flex;
-  justify-content: space-between;
-  padding: 6px 0 2px;
-  border-top: 1px dashed rgba(200, 145, 58, 0.18);
-  margin-top: 4px;
-  font-family: 'DM Mono', monospace;
+  font-family: var(--mono);
   font-size: 13px;
-  color: var(--gold);
-  font-weight: 700;
+  color: var(--bone);
+  letter-spacing: 0.03em;
+  font-weight: 500;
 }
-.ps-rollup {
-  margin-top: 16px;
-  padding: 14px 16px;
-  background: rgba(0,0,0,0.4);
-  border: 1px solid rgba(200, 145, 58, 0.3);
-  border-radius: var(--r-card);
+.ps-pw-total, .ps-rollup {
+  padding-top: 10px;
+  margin-top: 6px;
+  border-top: 1px dashed var(--line);
 }
+.ps-pw-total { color: var(--bone); font-weight: 400; }
+
 .ps-grand {
+  margin-top: 18px;
+  padding: 22px 0 22px;
+  border-top: 1px solid var(--gold);
+  border-bottom: 1px solid var(--gold);
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  margin-top: 10px;
-  padding: 12px 0 4px;
-  border-top: 2px solid var(--gold);
-  font-family: 'Playfair Display', serif;
-  font-size: 18px;
-  color: var(--gold);
-  font-weight: 700;
+  align-items: baseline;
+}
+.ps-grand span:first-child {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 20px;
+  color: var(--bone);
+  letter-spacing: 0.02em;
 }
 .ps-grand span:last-child {
-  font-family: 'DM Mono', monospace;
-  font-size: 22px;
-  color: var(--gold-bright);
-  letter-spacing: -0.5px;
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: 42px;
+  color: var(--gold);
+  letter-spacing: -0.01em;
+  line-height: 1;
 }
 
-/* Deposit card — gold-filled callout sitting below grand total */
 .ps-deposit {
-  margin-top: 12px;
-  padding: 16px 20px;
-  background: var(--gold);
-  border-radius: var(--r-card);
+  margin-top: 14px;
+  padding: 18px 18px;
+  background: rgba(201, 169, 97, 0.06);
+  border: 1px solid var(--line-strong);
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  box-shadow: 0 4px 16px rgba(200, 145, 58, 0.25);
+  align-items: baseline;
 }
 .ps-deposit-label {
-  font-family: 'Playfair Display', serif;
+  font-family: var(--serif);
+  font-style: italic;
   font-size: 16px;
-  color: var(--black);
-  font-weight: 700;
+  color: var(--bone);
+  letter-spacing: 0.03em;
 }
 .ps-deposit-value {
-  font-family: 'DM Mono', monospace;
-  font-size: 22px;
-  color: var(--black);
-  font-weight: 700;
-  letter-spacing: -0.5px;
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: 26px;
+  color: var(--gold);
+  letter-spacing: -0.005em;
 }
 
 /* ── Empty state ────────────────────────────────────────────── */
 .empty-state {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  opacity: 0.4;
   text-align: center;
-  gap: 12px;
-  padding: 60px 0;
+  padding: 80px 24px;
+  color: var(--bone-mute);
 }
-.empty-state svg { color: var(--gold); }
+.empty-state svg { color: var(--gold); opacity: 0.6; margin-bottom: 18px; }
 .empty-state p {
-  font-family: 'Playfair Display', serif;
-  color: var(--parchment);
-  font-size: 16px;
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 18px;
+  color: var(--bone-soft);
+  margin-bottom: 8px;
+  font-weight: 400;
 }
-.empty-state small { color: var(--gold-bright); font-size: 12px; }
-
-/* ── Buttons ────────────────────────────────────────────────── */
-.btn-actions {
-  margin-top: 20px;
-  display: flex;
-  gap: 8px;
-}
-.btn {
-  flex: 1;
-  padding: 12px;
-  border-radius: var(--r);
-  font-family: 'DM Mono', monospace;
+.empty-state small {
   font-size: 11px;
-  letter-spacing: 1px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--gold);
+  font-weight: 600;
+}
+
+/* ── Stair / Rail item cards (nested sub-cards) ─────────────── */
+.sub-card {
+  padding: 20px 22px !important;
+  border: 1px solid var(--line);
+  background: rgba(255, 248, 230, 0.55);
+  border-top: 1px solid var(--line) !important;
+  margin: 0;
+  transition: border-color 0.3s ease;
+  position: relative;
+  box-shadow: 0 1px 0 rgba(40, 30, 18, 0.04);
+}
+.bom-pane .sub-card { background: rgba(28, 26, 24, 0.6); box-shadow: none; }
+.sub-card:first-child { padding-top: 20px !important; }
+.sub-card:hover { border-color: var(--gold); box-shadow: none; }
+.sub-card::before { display: none; }
+
+.sub-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--line-soft);
+}
+.sub-card-header strong {
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 500;
+  font-size: 17px;
+  color: var(--gold);
+  letter-spacing: 0.04em;
+}
+.sub-card-actions { display: flex; gap: 10px; align-items: center; }
+.sub-card-dup {
+  background: transparent;
+  border: 1px solid var(--line-strong);
+  color: var(--gold);
+  padding: 6px 12px;
+  font-family: var(--sans);
+  font-size: 9px;
+  font-weight: 400;
+  letter-spacing: 0.24em;
   text-transform: uppercase;
   cursor: pointer;
-  border: 1px solid var(--gold-muted);
+  transition: all 0.3s ease;
+}
+.sub-card-dup:hover { background: var(--gold); color: var(--black); border-color: var(--gold); }
+.sub-card-remove {
   background: transparent;
-  color: var(--parchment);
-  transition: all 0.2s;
-  min-height: 44px;
+  border: none;
+  color: var(--bone-mute);
+  cursor: pointer;
+  font-size: 22px;
+  font-weight: 300;
+  line-height: 1;
+  padding: 2px 8px;
+  transition: color 0.2s;
 }
-.btn:hover { background: rgba(200, 145, 58, 0.12); }
-.btn.primary { background: var(--gold); color: var(--black); border-color: var(--gold); font-weight: 700; }
-.btn.primary:hover { background: var(--gold-bright); }
+.sub-card-remove:hover { color: var(--error); }
 
-/* Buttons inside form cards sit on parchment background — use dark text + gold fill for contrast */
-.card-body .btn {
-  background: var(--gold);
-  color: var(--black);
-  border-color: var(--gold);
-  font-weight: 700;
-}
-.card-body .btn:hover {
-  background: var(--gold-bright);
-  color: var(--black);
+/* Misc subtle dividers inside cards */
+.card-body hr {
+  border: none;
+  border-top: 1px solid var(--line-soft);
+  margin: 4px 0;
 }
 
-/* ── Validation badges ──────────────────────────────────────── */
-.badge {
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
-  border-radius: var(--r);
-  padding: 10px 12px;
-  font-size: 12px;
-  line-height: 1.5;
-  margin-top: 4px;
+/* ── Responsive ─────────────────────────────────────────────── */
+@media (max-width: 1100px) {
+  .app { grid-template-columns: 1fr; }
+  .bom-pane {
+    position: static;
+    max-height: none;
+    border-left: none;
+    border-top: 1px solid var(--line-soft);
+  }
+  .form-pane { border-right: none; }
 }
-.badge.info { background: rgba(200, 145, 58, 0.1); border: 1px solid rgba(200, 145, 58, 0.3); color: var(--gold-muted); }
-.badge.warn { background: rgba(139, 32, 32, 0.1); border: 1px solid rgba(139, 32, 32, 0.3); color: var(--error); }
-.badge.ok   { background: rgba(74, 122, 74, 0.12); border: 1px solid rgba(74, 122, 74, 0.3); color: var(--success); }
 
-/* ── Mobile (< 480px) polish ────────────────────────────────── */
+@media (max-width: 768px) {
+  header { padding: 16px 22px; gap: 12px; }
+  header h1 { font-size: 17px; letter-spacing: 0.26em; }
+  header p { font-size: 8px; letter-spacing: 0.36em; }
+  .logo { width: 40px; height: 40px; }
+  .logo span { font-size: 22px; }
+  .btn-reset { padding: 10px 14px; font-size: 9px; }
+
+  .tabs { padding: 0 12px; top: 80px; }
+  .tab { padding: 18px 16px; font-size: 10px; letter-spacing: 0.26em; }
+
+  .form-pane, .bom-pane, .materials-view {
+    padding: 28px 22px 60px;
+  }
+
+  .card { padding: 20px 20px 22px; }
+  .card-header { grid-template-columns: 40px 1fr; gap: 14px; padding-bottom: 12px; margin-bottom: 16px; }
+  .step-num { font-size: 28px; }
+  .card-header h2 { font-size: 20px; }
+
+  .row.r2, .row.r3 { grid-template-columns: 1fr; }
+  .field input, .field select { font-size: 16px; } /* prevents iOS zoom */
+
+  .bom-title { font-size: 28px; }
+  .bom-total-value, .ps-grand span:last-child { font-size: 30px; }
+  .bom-line { grid-template-columns: minmax(0, 1fr) 80px 90px; gap: 10px; }
+
+  .materials-header { flex-direction: column; align-items: stretch; }
+}
+
 @media (max-width: 480px) {
-  header { padding: 12px 16px; }
-  header h1 { font-size: 17px; }
-  header p { font-size: 10px; }
-  .form-pane { padding: 14px; gap: 14px; }
-  .card-body { padding: 16px; gap: 12px; }
-  .card-header h2 { font-size: 15px; }
-  .bom-title { font-size: 18px; }
+  .tabs { padding: 0 6px; }
+  .tab { padding: 16px 12px; font-size: 9px; }
+  .form-pane, .bom-pane, .materials-view { padding: 20px 16px 48px; }
+  .step-num { font-size: 28px; }
+  .card-header h2 { font-size: 18px; }
+  .bom-line { grid-template-columns: minmax(0, 1fr) 70px 80px; font-size: 11px; gap: 8px; }
+  .bom-line .desc { font-size: 12px; }
 }
 
 /* ── Print ──────────────────────────────────────────────────── */
 @media print {
-  body { background: white !important; color: black !important; }
+  body { background: white !important; color: #111 !important; font-family: 'Cormorant Garamond', Georgia, serif; }
+  body::before { display: none !important; }
   header, .tabs, .form-pane, .btn-actions, .btn, .bom-pane#rightPanel, #tabBuild .bom-pane { display: none !important; }
   .app { display: block; }
   .tab-pane { display: block !important; }
   .tab-pane#tabBuild { display: none !important; }
   .materials-view {
     background: white !important;
-    color: black !important;
+    color: #111 !important;
     padding: 0 !important;
     max-width: 100% !important;
-    min-height: auto !important;
   }
-  .materials-view * { color: black !important; background: white !important; }
-  body::before {
-    content: "Vivid Outdoor Living - Material Takeoff";
-    display: block;
-    font-family: 'Playfair Display', serif;
-    font-size: 24px;
-    color: black;
-    border-bottom: 2px solid black;
-    padding-bottom: 10px;
-    margin-bottom: 20px;
-  }
-  .bom-title, .bom-sub { color: black !important; }
-  .bom-group-label { border-bottom-color: black !important; color: black !important; }
-  .bom-line { padding: 4px 0 !important; border-bottom: 1px dotted #ddd; }
+  .materials-view * { color: #111 !important; background: white !important; }
+  .bom-title { font-size: 32px; border-bottom: 2px solid #111; padding-bottom: 12px; margin-bottom: 18px; }
+  .bom-title em { font-style: italic; color: #6e5520 !important; }
+  .bom-sub { color: #6e5520 !important; }
+  .bom-group-label { border-bottom-color: #111 !important; }
+  .bom-line { padding: 6px 0 !important; border-bottom: 1px dotted #999 !important; }
   .bom-line .raw { display: none !important; }
-  .bom-line .qty { color: black !important; font-weight: bold !important; }
+  .bom-line .qty { font-weight: 600 !important; }
   .bom-line .sku { color: #666 !important; }
+  .bom-total { border-top: 2px solid #111 !important; }
+  .bom-total-value { color: #6e5520 !important; }
 }
 
 </style>
@@ -714,10 +1000,12 @@ header p {
 <body>
 
 <header>
-  <div class="logo"><span>V</span></div>
-  <div>
+  <a href="#" class="logo" aria-label="Vivid Outdoor Living">
+    <img src="https://vividbackyards.com/brand/logo.jpg" alt="" onerror="this.style.display='none';this.parentElement.innerHTML='<span>V</span>';">
+  </a>
+  <div class="logo-wordmark">
     <h1>Vivid Outdoor Living</h1>
-    <p>Deck Takeoff - Internal Tool</p>
+    <p>Deck Takeoff &middot; Internal Tool</p>
   </div>
   <div class="hdr-r"><button class="btn-reset" onclick="resetAll()">Reset</button></div>
 </header>
@@ -774,7 +1062,7 @@ header p {
         <div class="field"><label>Sq Footage (auto)</label><div class="computed" id="dSqFt">-</div></div>
         <div class="field"><label>Perimeter (auto)</label><div class="computed" id="dPerim">-</div></div>
       </div>
-      <hr style="border:none;border-top:1px solid var(--parchment-soft);margin:4px 0;">
+      <hr>
       <label class="toggle-row"><input type="checkbox" id="resurfaceExisting"> Resurface existing deck (skip new framing)</label>
       <label class="toggle-row"><input type="checkbox" id="reinforceJoists"> Reinforce existing joists (close wide spacing to 12" OC)</label>
       <label class="toggle-row"><input type="checkbox" id="permitRequired" checked> Permit required</label>
@@ -900,7 +1188,7 @@ header p {
         Step count auto-calculated from height (H ÷ 7.75", round up). Risers always present at 7.75" each. Excess depth is excavated below grade per spec.
       </div>
       <div id="stairList" style="display:flex;flex-direction:column;gap:12px;"></div>
-      <button class="btn" type="button" onclick="addStair()" style="align-self:flex-start;flex:0 0 auto;padding:10px 18px;">+ Add Staircase</button>
+      <button class="btn" type="button" onclick="addStair()" style="align-self:flex-start;">+ Add Staircase</button>
     </div>
   </div>
 
@@ -909,7 +1197,7 @@ header p {
     <div class="card-header"><div class="step-num">7</div><h2>Railing</h2></div>
     <div class="card-body">
       <div id="railList" style="display:flex;flex-direction:column;gap:12px;"></div>
-      <button class="btn" type="button" onclick="addRailRun()" style="align-self:flex-start;flex:0 0 auto;padding:10px 18px;">+ Add Railing Run</button>
+      <button class="btn" type="button" onclick="addRailRun()" style="align-self:flex-start;">+ Add Railing Run</button>
       <div id="railValidation"></div>
     </div>
   </div>
@@ -6143,11 +6431,11 @@ function addStair() {
   _stairCounter++;
   const stairNum = _stairCounter;
   const id = `stair_${stairNum}`;
-  const div = el("div", { class: "card", id, style: "padding:14px;background:#1a1a1a;color:var(--parchment);" });
+  const div = el("div", { class: "card sub-card", id });
   div.innerHTML = `
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+    <div class="sub-card-header">
       <strong>Staircase ${stairNum}</strong>
-      <button onclick="document.getElementById('${id}').remove();recalc();" style="background:transparent;color:var(--gold);border:none;cursor:pointer;font-size:18px;">x</button>
+      <button class="sub-card-remove" onclick="document.getElementById('${id}').remove();recalc();" aria-label="Remove">&times;</button>
     </div>
     <div class="row r3">
       <div class="field"><label>Width (ft)</label>
@@ -6195,13 +6483,13 @@ let _railCounter = 0;
 function addRailRun() {
   _railCounter++;
   const id = `rail_${_railCounter}`;
-  const div = el("div", { class: "card", id, style: "padding:14px;background:#1a1a1a;color:var(--parchment);" });
+  const div = el("div", { class: "card sub-card", id });
   div.innerHTML = `
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+    <div class="sub-card-header">
       <strong>Run ${_railCounter}</strong>
-      <div style="display:flex;gap:10px;align-items:center;">
-        <button onclick="duplicateRailRun('${id}');" title="Duplicate this run" style="background:transparent;color:var(--gold);border:1px solid var(--gold-muted);padding:4px 10px;border-radius:4px;cursor:pointer;font-size:11px;font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:1px;">+ Dup</button>
-        <button onclick="document.getElementById('${id}').remove();recalc();updateDrinkRailCard();" title="Remove" style="background:transparent;color:var(--gold);border:none;cursor:pointer;font-size:18px;">x</button>
+      <div class="sub-card-actions">
+        <button class="sub-card-dup" onclick="duplicateRailRun('${id}');" title="Duplicate this run">+ Dup</button>
+        <button class="sub-card-remove" onclick="document.getElementById('${id}').remove();recalc();updateDrinkRailCard();" title="Remove" aria-label="Remove">&times;</button>
       </div>
     </div>
     <div class="row r2">
