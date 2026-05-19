@@ -6673,31 +6673,46 @@ function rollupBOM(input) {
 
   // ── Labor lines ──
   const deckSqft = input.P * input.W;
-  const deckLaborRate = resurface ? 12 : 17;
+  const deckLaborRate = resurface ? 12 : 15;
   const deckLaborTotal = +(deckSqft * deckLaborRate).toFixed(2);
   if (deckSqft > 0) {
     bom.push(_laborLine("deck", `Deck labor (${deckSqft.toFixed(0)} sqft x ${deckLaborRate}/sqft, ${resurface?"resurface":"new build"})`, deckLaborTotal));
   }
 
-  // Stair labor: $17/sqft of (rise + run) per stair
+  // Stair labor: $650 per 7 treads (or fraction thereof — every stair gets at least $650).
+  // For L/U shapes, stairResults contains one entry per FLIGHT — aggregate treads per
+  // physical stair (by idx) so a single L-shape stair counts as one stair's labor.
   let stairLaborTotal = 0;
-  stairResults.stairs.forEach((s, i) => {
-    const widthIn = ftToIn(s.width);
-    const riseAreaSqFt = s.risers * IRC_STAIR.max_riser_in * widthIn / 144;
-    const runAreaSqFt  = s.treads * IRC_STAIR.min_tread_in * widthIn / 144;
-    const stairLabor = +((riseAreaSqFt + runAreaSqFt) * 17).toFixed(2);
+  const treadsByStairIdx = {};
+  stairResults.stairs.forEach(s => {
+    treadsByStairIdx[s.idx] = (treadsByStairIdx[s.idx] || 0) + (s.treads || 0);
+  });
+  Object.entries(treadsByStairIdx).forEach(([idx, totalTreads]) => {
+    if (totalTreads <= 0) return;
+    const units = Math.ceil(totalTreads / 7);   // every 7 treads = one labor unit
+    const stairLabor = units * 650;
     stairLaborTotal += stairLabor;
-    bom.push(_laborLine("stair", `Stair ${i+1} labor (${(riseAreaSqFt+runAreaSqFt).toFixed(1)} sqft rise+run x $17/sqft)`, stairLabor));
+    bom.push(_laborLine("stair", `Stair ${+idx+1} labor (${totalTreads} treads, ${units} x $650 per 7 treads)`, stairLabor));
   });
 
-  // Railing labor: $25 per 6' section, $30 per 8' section
+  // Railing labor: $25 per section (level + stair sections combined), plus a $50 flat
+  // specialty bonus per run for cable or glass infills (extra install complexity).
   let railingLaborTotal = 0;
   allRailRuns.forEach((run, i) => {
-    const sectionCount = Math.ceil(run.lengthFt / run.sectionLengthFt);
-    const ratePerSection = run.sectionLengthFt === 8 ? 30 : (run.sectionLengthFt === 6 ? 25 : 27.5);
-    const runLabor = +(sectionCount * ratePerSection).toFixed(2);
+    // Use total length (level + stair), falling back to legacy lengthFt for safety.
+    const totalLenFt = ((run.levelLengthFt || 0) + (run.stairLengthFt || 0)) || (run.lengthFt || 0);
+    if (totalLenFt <= 0) return;
+    const sectionCount = Math.ceil(totalLenFt / (run.sectionLengthFt || 6));
+    const isSpecialty =
+      run.infill === "vert_cable" ||
+      run.infill === "horiz_cable" ||
+      run.infill === "glass" ||
+      (run.collection === "classic" && run.infill === "cable");
+    const specialtyBonus = isSpecialty ? 50 : 0;
+    const runLabor = sectionCount * 25 + specialtyBonus;
     railingLaborTotal += runLabor;
-    bom.push(_laborLine("railing", `Run ${i+1} railing labor (${sectionCount} x ${run.sectionLengthFt}' sections @ ${ratePerSection})`, runLabor));
+    const specialtyNote = isSpecialty ? ` + $50 specialty (${run.infill})` : "";
+    bom.push(_laborLine("railing", `Run ${i+1} railing labor (${sectionCount} sections x $25${specialtyNote})`, runLabor));
   });
 
   // ── Paperwork lines ──
