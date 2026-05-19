@@ -645,6 +645,15 @@ header p {
   margin-top: 4px;
   text-transform: uppercase;
 }
+.bom-line .agg-runs {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 12px;
+  color: var(--gold);
+  font-weight: 400;
+  margin-left: 6px;
+  letter-spacing: 0.02em;
+}
 .bom-line .qty {
   font-family: var(--mono);
   font-size: 14px;
@@ -1669,6 +1678,7 @@ const PRICES_TIMBERTECH = {"A55X55ICAPMB": 45.0,
    "AZTBULKIXTR18B": 225.0,
    "AZTBULKIXTR18BR": 225.0,
    "AZTBULKIXTR18W": 225.0,
+   "AZTBULKSR10W": 78.0,
    "AZTCR100CABLE": 145.0,
    "AZTCR36BAL": 42.0,
    "AZTCR36HWKIT": 95.0,
@@ -1681,6 +1691,8 @@ const PRICES_TIMBERTECH = {"A55X55ICAPMB": 45.0,
    "AZTCRACCKIT": 35.0,
    "AZTCRCUTTER": 35.0,
    "AZTCRSLEEVE": 35.0,
+   "AZTCRSRSPC": 65.0,
+   "AZTCRWRWH": 28.0,
    "AZTDL100TRAN": 95.0,
    "AZTDL150PPR": 185.0,
    "AZTDL3X3LANCAPB": 95.0,
@@ -1714,6 +1726,7 @@ const PRICES_TIMBERTECH = {"A55X55ICAPMB": 45.0,
    "AZTGATEW": 175.0,
    "AZTGLASS6B": 89.0,
    "AZTGLASS6W": 89.0,
+   "AZTHWKITRT": 32.0,
    "AZTIX2X2MSKIRTB": 29.0,
    "AZTIX2X2MSKIRTBR": 29.0,
    "AZTIX2X2MSKIRTW": 29.0,
@@ -1810,6 +1823,9 @@ const PRICES_TIMBERTECH = {"A55X55ICAPMB": 45.0,
    "AZTIX4x4PSKB": 29.0,
    "AZTIX4x4PSKBR": 29.0,
    "AZTIX4x4PSKW": 29.0,
+   "AZTIXACCKITB": 35.0,
+   "AZTIXACCKITBR": 35.0,
+   "AZTIXACCKITW": 35.0,
    "AZTIXACCKITW / B / BR": 35.0,
    "AZTIXADA6J": 35.0,
    "AZTIXADA90CB": 65.0,
@@ -1882,6 +1898,8 @@ const PRICES_TIMBERTECH = {"A55X55ICAPMB": 45.0,
    "AZTIXHC20CABLE": 115.0,
    "AZTIXHC40CABLE": 219.0,
    "AZTIXHC60CABLE": 315.0,
+   "AZTIXHC90PI36": 22.0,
+   "AZTIXHC90PI42": 24.0,
    "AZTIXHC90PK38B": 125.0,
    "AZTIXHC90PK38BR": 125.0,
    "AZTIXHC90PK38W": 125.0,
@@ -1918,6 +1936,7 @@ const PRICES_TIMBERTECH = {"A55X55ICAPMB": 45.0,
    "AZTIXHCLP8B": 239.0,
    "AZTIXHCLP8BR": 239.0,
    "AZTIXHCLP8W": 239.0,
+   "AZTIXHCSAW": 8.0,
    "AZTIXHCSP6B": 195.0,
    "AZTIXHCSP6BR": 195.0,
    "AZTIXHCSP6W": 195.0,
@@ -1971,6 +1990,9 @@ const PRICES_TIMBERTECH = {"A55X55ICAPMB": 45.0,
    "AZTIXUGLASSP6BR": 195.0,
    "AZTIXUGLASSP6W": 195.0,
    "AZTIXWBKT45KIT": 35.0,
+   "AZTIXWBKTKITB": 45.0,
+   "AZTIXWBKTKITBR": 45.0,
+   "AZTIXWBKTKITW": 45.0,
    "AZTIXWBKTKITW / B / BR": 49.0,
    "AZTSMP3642": 129.98,
    "AZTSMP6ADAPTOR": 35.0,
@@ -2590,6 +2612,14 @@ const PRICES_TIMBERTECH = {"A55X55ICAPMB": 45.0,
 ;
 
 const PRICES_LUMBER = {
+  "2x4": {
+    "4": 3.5,
+    "8": 6.5,
+    "10": 8.0,
+    "12": 9.5,
+    "14": 11.5,
+    "16": 13.0
+  },
   "2x6": {
     "4": 5.5,
     "8": 9.5,
@@ -3014,12 +3044,16 @@ const DECKING_SKU_LOOKUP = {
   "premier_plus|riser|12|Natural Oak": "PRPRISERNO",
   "premier_plus|sq_1x6|16|Natural Oak": "PRP5416NO",
   "premier_plus|sq_1x6|20|Natural Oak": "PRP5420NO",
+  "premier|fascia|12|Dark Teak": "FBE12DT",
+  "premier|fascia|12|Maritime Gray": "FBE12MG",
   "premier|grv_1x6|12|Dark Teak": "EFGV5412DT",
   "premier|grv_1x6|12|Maritime Gray": "EFGV5412MG",
   "premier|grv_1x6|16|Dark Teak": "EFGV5416DT",
   "premier|grv_1x6|16|Maritime Gray": "EFGV5416MG",
   "premier|grv_1x6|20|Dark Teak": "EFGV5420DT",
   "premier|grv_1x6|20|Maritime Gray": "EFGV5420MG",
+  "premier|riser|12|Dark Teak": "ERISERDT",
+  "premier|riser|12|Maritime Gray": "ERISERMG",
   "premier|sq_1x6|16|Dark Teak": "EF5416DT",
   "premier|sq_1x6|16|Maritime Gray": "EF5416MG",
   "premier|sq_1x6|20|Dark Teak": "EF5420DT",
@@ -3757,7 +3791,11 @@ const CATALOG = {
           label: "Premier Collection",
           colors: ["Dark Teak", "Maritime Gray"],
           scalloped_bottom: false,
-          profiles: _compositeProfiles({ thick: 0.89, no_fascia_riser: true })
+          // Premier shares fascia/riser SKUs with Prime ("Prime & Premier Fascia/Riser"
+          // in the 2026 catalog). The Python build script aliases those shared SKUs
+          // under both 'prime' and 'premier' collection keys, so we DO need fascia/riser
+          // profiles here for the resolver to pick them up.
+          profiles: _compositeProfiles({ thick: 0.89 })
         },
         premier_plus: {
           label: "Premier+ Collection",
@@ -3818,7 +3856,23 @@ const CATALOG = {
           { id: "sq_comp",   label: "Square Composite Baluster", per_pack: 18, baluster_qty: { "6": 13, "8": 18, "10": 23 }, colors: ["gloss_white","matte_white","matte_espresso","matte_black"], heights_in: [29,31,35,37] },
           { id: "round_alu", label: "Round Aluminum Baluster",   per_pack: 20, baluster_qty: { "6": 15, "8": 20, "10": 25 }, colors: ["black"], heights_in: [29,31,35,37], stair_heights_in: [29,37] },
           { id: "sq_alu",    label: "Square Aluminum Baluster",  per_pack: 20, baluster_qty: { "6": 15, "8": 20, "10": 25 }, colors: ["black"], heights_in: [29,31,35,37], stair_heights_in: [29,37] },
-          { id: "cable",     label: "CableRail",                 colors: ["-"] },
+          { id: "cable",     label: "CableRail",                 colors: ["-"],
+            // Classic Composite bulk-cable system: installer cuts to fit from 100' or 500' reels.
+            // Hardware kit count is by RUN (one per end-to-end cable run, not per opening).
+            cable_count_by_height: { 36: 9, 42: 11 },             // per AZTCR{H}HWKIT description
+            hardware_kit_sku_by_height: { 36: "AZTCR36HWKIT", 42: "AZTCR42HWKIT" },
+            intermediate_baluster_sku_by_height: { 36: "AZTCR36BAL", 42: "AZTCR42BAL" },
+            intermediate_stair_baluster_sku_by_height: { 36: "AZTCR36STAIRBAL", 42: "AZTCR42STAIRBAL" },
+            // Per-panel baluster count (install guide page 4): 6' panel = 1, 8' = 2, 10' = 3
+            balusters_per_section: { 6: 1, 8: 2, 10: 3 },
+            pivot_hardware_sku_by_height: { 36: "AZTCR36HWSKIT" }, // 45-deg pivot only at 36"
+            bulk_cable_skus: { 100: "AZTCR100CABLE", 500: "AZTCR500CABLE" },
+            // 10' x 42" requires aluminum top support rail (install guide page 6).
+            aluminum_top_support_sku_by_length: { 10: "AZTBULKSR10W" },
+            project_accessories: ["AZTCRACCKIT", "AZTCRCUTTER", "AZTCRWRWH"],
+            // CRITICAL: Cable rail is NOT compatible with the Secure Mount Post (install guide page 3).
+            // A structural 4x4 PT post is required inside any sleeve-style post for cable tension.
+            incompatible_with_smp: true },
           { id: "glass",     label: "Glass Channel Kit",         colors: ["gloss_white","black"], section_lengths: [6] }
         ],
         sleeves: [
@@ -3871,12 +3925,25 @@ const CATALOG = {
         ],
         infills: [
           { id: "standard",    label: "Standard Baluster Panel", baluster_qty: { "6": 15, "8": 20 }, colors: ["white","black","dark_bronze"] },
-          { id: "vert_cable",  label: "Vertical Cable Panel", stair_heights: [36], stair_lengths: [6], constraint_42: "residential_only", colors: ["white","black","dark_bronze"] },
-          { id: "horiz_cable", label: "Horizontal Cable Kit", colors: ["white","black","dark_bronze"] },
-          { id: "glass",       label: "Universal Glass Panel Kit", colors: ["white","black","dark_bronze"], section_lengths: [6] }
+          { id: "vert_cable",  label: "Vertical Cable Panel",
+            stair_heights: [36], stair_lengths: [6],
+            constraint_42: "residential_only",
+            requires_3_inch_post: true,                       // install guide: 3" required to reach 6' lengths
+            colors: ["white","black","dark_bronze"] },
+          { id: "horiz_cable", label: "Horizontal Cable Kit",
+            requires_3_inch_post: true,                       // install guide: 3" specialty posts required
+            uses_specialty_post_kits: true,                    // engine emits HCEPK/HCIPK/HC90PK/HCESPK/HCISPK instead of standard 3x3 kit
+            cable_count_by_height: { 36: 10, 42: 13 },         // approx; ~3.5" spacing to meet 4" sphere rule
+            cable_kit_lengths_ft: [10, 20, 40, 60],            // 4 SKU lengths: AZTIXHC{10|20|40|60}CABLE
+            max_cable_run_ft: 60,                              // hard limit per cable kit; runs longer need an end-post split
+            colors: ["white","black","dark_bronze"] },
+          { id: "glass",       label: "Universal Glass Panel Kit",
+            colors: ["white","black","dark_bronze"],
+            section_lengths: [6] }
         ],
         sleeves: [
-          { size: "3x3",        type: "kit",          heights_in: [38, 43, 48],   colors: ["white","black","dark_bronze"], includes_cap_and_skirt: true },
+          { size: "3x3",        type: "kit",          heights_in: [38, 43, 48],   colors: ["white","black","dark_bronze"], includes_cap_and_skirt: true,
+            variants_for_horiz_cable: { end: "HCEPK", inline: "HCIPK", corner_90: "HC90PK", stair_end: "HCESPK", stair_inline: "HCISPK" } },
           { size: "3x3_fascia", type: "fascia_mount", heights_in: [52],            colors: ["white","black","dark_bronze"], includes_cap_and_base: true },
           { size: "4x4",        type: "sleeve",       heights_in: [39, 48, 108],   colors: ["white","black","dark_bronze"] },
           { size: "2x2",        type: "otp",          heights_in: [36, 42],         colors: ["white","black","dark_bronze"], constraint: "straight_runs_only_with_18ft_top_rail" }
@@ -4433,12 +4500,17 @@ function selectKneeBracing(postCount, postHeightFt) {
   ];
 }
 
-function countBlocking(P_ft, W_ft, pfRows, pfWidthIn, brkN, brkWidthIn, joistSpanFt) {
-  const joistOC_ft = 1;     // 12" OC
+function countBlocking(P_ft, W_ft, pfRows, pfWidthIn, brkN, brkWidthIn, joistSpanFt, joistOC_in = 16, joistSize = "2x10") {
+  // Joist OC (16 residential, 12 for diagonal/commercial/MAX). Defaults to 16.
+  const joistOC_ft = joistOC_in / 12;
   const joistCount = Math.floor(W_ft / joistOC_ft) + 1;
 
-  // Mid-span blocking — only if joist span > 8' (DCA 6)
-  const midspan_blocks = (joistSpanFt > 8) ? (joistCount - 1) : 0;
+  // TimberTech install guide (PVC pg 4, Composite pg 4): blocking required between
+  // each joist, in rows at most every 4'-6'. Tighter than DCA 6's "only when span > 8'".
+  // We use 5' as a reasonable middle ground per AZEK recommendation.
+  const blocking_row_spacing_ft = 5;
+  const rowsOfBlocking = Math.max(1, Math.floor(joistSpanFt / blocking_row_spacing_ft));
+  const midspan_blocks = rowsOfBlocking * (joistCount - 1);
 
   // PF blocking — perimeter of each concentric inset rectangle
   let pf_blocking_lf = 0;
@@ -4452,17 +4524,17 @@ function countBlocking(P_ft, W_ft, pfRows, pfWidthIn, brkN, brkWidthIn, joistSpa
   // Breaker blocking — full deck width × number of breakers
   const breaker_blocking_lf = brkN * W_ft;
 
-  // Estimate block lengths: 14.5" between joists at 12" OC (joist thickness 1.5")
-  const blockLenIn = 12 - 1.5;       // 10.5" actual block length
+  // Block length = joist OC - joist thickness (1.5")
+  const blockLenIn = joistOC_in - 1.5;
   const totalBlockingLF = midspan_blocks * (blockLenIn / 12) + pf_blocking_lf + breaker_blocking_lf;
-  // Convert to standard 2× lumber pieces (8' typical)
+  // Convert to standard 2× lumber pieces (8' typical) of MATCHING joist size
   const blockBoardsNeeded = Math.ceil(totalBlockingLF / 8);
 
   const bom = [
     makeBOMLine({
       category: "framing",
-      description: `2x10 SYP #2 x 8' (cut for blocking)`,
-      sku: "2x10-8-SYP",
+      description: `${joistSize} SYP #2 x 8' (cut for blocking, ${rowsOfBlocking} row${rowsOfBlocking>1?"s":""} every ~${blocking_row_spacing_ft}')`,
+      sku: `${joistSize}-8-SYP`,
       qty_raw: blockBoardsNeeded,
       unit: "pcs",
       unit_lf: 8
@@ -4658,13 +4730,19 @@ function resolveDeckingProfile({ series, collection, use, widthOverrideIn, profi
         }
       }
     }
-    // square requested for field → matching grooved variant
+    // square requested for field → matching grooved variant; if grv is unavailable
+    // for this color, allow the sq to be face-screwed for field (e.g., Kona has no grv)
     if (profileId.startsWith("sq_") && use === "field") {
       const grvId = profileId.replace("sq_", "grv_");
       const grv = coll.profiles[grvId];
       if (grv && grv.use.includes(use)) {
         const r = _resolveProfile(grvId, grv);
         if (r) return r;
+      }
+      // Grv not available for this color — fall back to sq face-screwed (use lengths_by_color if any)
+      if (p) {
+        const r = _resolveProfile(profileId, p);
+        if (r) return { ...r, _faceScrewed: true };
       }
     }
     // MAX honored as field with face-fastening
@@ -4678,17 +4756,33 @@ function resolveDeckingProfile({ series, collection, use, widthOverrideIn, profi
   const matches = Object.entries(coll.profiles)
     .filter(([id, p]) => p.use.includes(use))
     .filter(([id, p]) => !color || !p.colors_filter || p.colors_filter.includes(color));
-  if (!matches.length) return null;
 
-  // Width-by-inches override (back-compat)
-  if (widthOverrideIn) {
-    const exact = matches.find(([id, p]) => p.actual_w_in === widthOverrideIn);
-    if (exact) return _resolveProfile(exact[0], exact[1]);
+  if (matches.length) {
+    // Width-by-inches override (back-compat)
+    if (widthOverrideIn) {
+      const exact = matches.find(([id, p]) => p.actual_w_in === widthOverrideIn);
+      if (exact) return _resolveProfile(exact[0], exact[1]);
+    }
+    // Default: prefer 5.5" standard (not MAX), else first
+    const default5 = matches.find(([id, p]) => p.actual_w_in === 5.5 && p.thick_in !== 1.5);
+    const def = default5 || matches[0];
+    return _resolveProfile(def[0], def[1]);
   }
-  // Default: prefer 5.5" standard (not MAX), else first
-  const default5 = matches.find(([id, p]) => p.actual_w_in === 5.5 && p.thick_in !== 1.5);
-  const def = default5 || matches[0];
-  return _resolveProfile(def[0], def[1]);
+
+  // Catch-all face-screwed fallback (e.g., Kona has no field-capable profile because
+  // grv_1x6 is color-filtered out and sq_1x6 is PF-only by design — but you can still
+  // face-screw an sq board to use it for field). Find ANY square-edge profile that
+  // supports this color, and return it flagged as face-screwed.
+  if (use === "field") {
+    const sqAny = Object.entries(coll.profiles).find(([id, p]) =>
+      id.startsWith("sq_") && (!color || !p.colors_filter || p.colors_filter.includes(color))
+    );
+    if (sqAny) {
+      const r = _resolveProfile(sqAny[0], sqAny[1]);
+      if (r) return { ...r, _faceScrewed: true };
+    }
+  }
+  return null;
 }
 
 // Helper used by all decking count functions to construct a real TT SKU.
@@ -4714,9 +4808,47 @@ function _deckingSKU(profile, lengthFt, color, fallback) {
 // SECTION 6 — STAIRS / DRINK RAIL
 // ═══════════════════════════════════════════════════════════════════════════
 
-function countStairs({ stairs = [], H_in, mainProfile, riserProfile, fasciaProfile, mainColor, riserColor, fasciaColor }) {
+function countStairs({ stairs = [], H_in, mainProfile, stairProfile, riserProfile, fasciaProfile, mainColor, riserColor, fasciaColor, collectionKey, seriesKey }) {
+  // Defensive: never crash on null profile resolution
+  if (!mainProfile) {
+    mainProfile = { actual_w_in: 5.5, thick_in: 1.0, lengths_ft: [12, 16, 20], id: "sq_1x6", collection: { label: "Decking" } };
+  }
+  // stairProfile = the SQUARE-edge profile used for face-fastened treads. Falls back
+  // to mainProfile if stair resolution returned null (legacy / catalog gap).
+  const treadProfile = stairProfile || mainProfile;
+  // riserProfile / fasciaProfile may be null if the resolver didn't find a match
+  // (e.g., a collection that doesn't expose a riser SKU). Fall back to a 12' default
+  // so the calc keeps producing a plausible BOM line the installer can correct.
+  if (!riserProfile)  riserProfile  = { actual_w_in: 7.25,  thick_in: 0.75, lengths_ft: [12], id: "riser",  collection: { label: "Riser" } };
+  if (!fasciaProfile) fasciaProfile = { actual_w_in: 11.75, thick_in: 0.50, lengths_ft: [12], id: "fascia", collection: { label: "Fascia" } };
   const allBom = [];
   const stairResults = [];
+
+  // Per-material max stringer spacing.
+  // Vivid house policy: NEVER wider than 12" OC on stairs — stairs see high-traffic wear
+  // and we want the extra stability margin regardless of what the manufacturer allows.
+  // If manufacturer requires tighter (e.g., composite Premier @ 9", Legacy @ 10"),
+  // we use the tighter spec.
+  function maxStringerSpacingIn(collectionKey, seriesKey, profileId) {
+    const VIVID_HOUSE_MAX = 12;
+    let mfrSpec = VIVID_HOUSE_MAX;
+    if (seriesKey === "composite") {
+      // Composite install guide pg 8:
+      switch (collectionKey) {
+        case "premier":        mfrSpec = 9;  break;
+        case "legacy":
+        case "reserve":
+        case "prime":
+        case "prime_plus":
+        case "premier_plus":   mfrSpec = 10; break;
+        case "terrain":
+        case "terrain_plus":   mfrSpec = 16; break; // veneer-only per mfr; capped by house policy
+      }
+    }
+    // PVC: mfr allows up to 16" with MAX boards but house policy caps at 12.
+    return Math.min(mfrSpec, VIVID_HOUSE_MAX);
+  }
+  const stringerSpacing = maxStringerSpacingIn(collectionKey, seriesKey, treadProfile.id);
 
   stairs.forEach((stair, idx) => {
     const widthFt = stair.width;
@@ -4732,40 +4864,57 @@ function countStairs({ stairs = [], H_in, mainProfile, riserProfile, fasciaProfi
     const stringerLengthFt = nextStandardLength(stringerLengthIn / 12);
     const landingRequired = (total_rise_in / 12) > IRC_STAIR.max_landing_h_ft;
 
-    // Stringer count by width
-    let stringerCount = 2;
-    if (widthIn > 36 && widthIn <= 48) stringerCount = 3;
-    else if (widthIn > 48) stringerCount = 3 + Math.ceil((widthIn - 48) / 16);
+    // Stringer count by stair width AND tread material's max spacing.
+    // Formula: at least 2 (one per outer edge); add interior stringers so no span
+    // exceeds the material's max. spans = ceil(width / maxSpacing), stringers = spans + 1.
+    const stringerCount = Math.max(2, Math.ceil(widthIn / stringerSpacing) + 1);
 
     stairResults.push({
       idx, width: widthFt, risers, treads,
-      excavation_below_grade_in, stringerLengthFt, stringerCount, landingRequired
+      excavation_below_grade_in, stringerLengthFt, stringerCount, landingRequired,
+      stringerSpacing
     });
 
     // Stringers (PT 2×12)
     allBom.push(makeBOMLine({
       category: "framing",
-      description: `Stair ${idx+1} - 2x12 PT stringer (${stringerLengthFt}')`,
+      description: `Stair ${idx+1} - 2x12 PT stringer (${stringerLengthFt}', spacing <=${stringerSpacing}" per ${seriesKey})`,
       sku: `2x12-${stringerLengthFt}-PT`,
       qty_raw: stringerCount,
       unit: "pcs",
       unit_lf: stringerLengthFt
     }));
 
-    // Treads (main profile)
-    const rowsPerStep = Math.ceil(IRC_STAIR.min_tread_in / mainProfile.actual_w_in);
+    // Treads — use SQUARE-edge profile (treadProfile), not the grooved field profile.
+    // Square-edge boards are face-fastened to stringers with Cortex/TOPLoc per install guide.
+    const rowsPerStep = Math.ceil(IRC_STAIR.min_tread_in / treadProfile.actual_w_in);
     const totalTreadRows = treads * rowsPerStep;
-    const treadCombo = bestCombo(widthFt, mainProfile.lengths_ft);
+    const treadCombo = bestCombo(widthFt, treadProfile.lengths_ft);
     if (treadCombo) {
       const treadsPerBoard = Math.floor(treadCombo.boardLen / widthFt);
       const treadBoardCount = Math.ceil(totalTreadRows / treadsPerBoard);
       allBom.push(makeBOMLine({
         category: "stair",
-        description: `Stair ${idx+1} - Tread boards (${mainProfile.collection?.label || "Main"}, ${treadCombo.boardLen}')`,
-        sku: _deckingSKU(mainProfile, treadCombo.boardLen, mainColor, "STAIR-TREAD"),
+        description: `Stair ${idx+1} - Tread boards (${treadProfile.collection?.label || "Main"}, ${treadCombo.boardLen}', square-edge for face-fastening)`,
+        sku: _deckingSKU(treadProfile, treadCombo.boardLen, mainColor, "STAIR-TREAD"),
         qty_raw: treadBoardCount,
         unit: "pcs",
         unit_lf: treadCombo.boardLen
+      }));
+    }
+
+    // PVC stair install guide pg 23: 2x4 PT centered under each tread row for support.
+    // Composite install guide doesn't require this (its tighter stringer spacing handles it).
+    if (seriesKey === "pvc") {
+      const tread2x4LenFt = nextStandardLength(widthFt + 0.5);  // a bit longer than stair width for cutting
+      allBom.push(makeBOMLine({
+        category: "framing",
+        description: `Stair ${idx+1} - 2x4 PT tread support (${tread2x4LenFt}', centered under each tread per PVC install guide)`,
+        sku: `2x4-${tread2x4LenFt}-PT`,
+        qty_raw: treads,
+        unit: "pcs",
+        unit_lf: tread2x4LenFt,
+        notes: "Pneumatic framing nailer with 3-1/4\" x .131 nails per install guide pg 23"
       }));
     }
 
@@ -4975,6 +5124,58 @@ function validateRailing({ runs = [], deckingScalloped = false }) {
     if (run.topRail === "drink" && run.infill === "glass") {
       errors.push(`Run ${i+1}: Drink Rail not compatible with glass infill`);
     }
+
+    // ─── New safeguards (hybrid run model) ────────────────────────────
+    // Cable infills (vert + horiz) require 3" post
+    if ((run.infill === "vert_cable" || run.infill === "horiz_cable") &&
+        run.postSize && !run.postSize.startsWith("3x3")) {
+      errors.push(`Run ${i+1}: ${run.infill === "vert_cable" ? "Vertical" : "Horizontal"} Cable requires a 3" aluminum post kit (selected: ${run.postSize})`);
+    }
+    // Glass infill: only 6' panels exist
+    if (run.infill === "glass" && run.sectionLengthFt && run.sectionLengthFt !== 6) {
+      errors.push(`Run ${i+1}: Universal Glass Panel only available in 6' (selected ${run.sectionLengthFt}')`);
+    }
+    // Horizontal cable: cable kits max 60'; level + stair are separate cable runs
+    if (run.infill === "horiz_cable") {
+      const lvlLF = run.levelLengthFt != null ? run.levelLengthFt : (run.hasStair ? 0 : (run.lengthFt || 0));
+      const stairLF = run.stairLengthFt != null ? run.stairLengthFt : (run.hasStair ? (run.lengthFt || 0) : 0);
+      if (lvlLF > 60) {
+        errors.push(`Run ${i+1}: Horizontal Cable level portion (${lvlLF} LF) exceeds 60' single-cable max. Split into multiple runs with an intermediate end post.`);
+      }
+      if (stairLF > 60) {
+        errors.push(`Run ${i+1}: Horizontal Cable stair portion (${stairLF} LF) exceeds 60' single-cable max.`);
+      }
+    }
+    // Classic CableRail: bulk cable system also benefits from end-post anchor every ~60'
+    if (run.collection === "classic" && run.infill === "cable") {
+      const totalLF = (run.levelLengthFt || 0) + (run.stairLengthFt || 0) || (run.lengthFt || 0);
+      if (totalLF > 60) {
+        errors.push(`Run ${i+1}: Classic CableRail recommends an intermediate end post every 60' (run is ${totalLF} LF).`);
+      }
+    }
+    // Hybrid run sanity: hasStair=yes but stair length missing
+    if (run.hasStair && run.stairLengthFt != null && run.stairLengthFt === 0 && (run.levelLengthFt || 0) > 0) {
+      errors.push(`Run ${i+1}: Has Stair Section is enabled but Stair Length is 0. Enter a stair length or uncheck the toggle.`);
+    }
+    // ADA handrail requires a stair portion
+    if (run.adaHandrail && (!run.stairLengthFt || run.stairLengthFt === 0)) {
+      errors.push(`Run ${i+1}: ADA Handrail specified but run has no stair portion.`);
+    }
+    // Wall terminations sanity
+    if (run.wallTerminations > 2) {
+      errors.push(`Run ${i+1}: Wall Terminations cannot exceed 2 (one per run end).`);
+    }
+    // Corners exceeding available inline post slots
+    const totalLF = (run.levelLengthFt || 0) + (run.stairLengthFt || 0) || (run.lengthFt || 0);
+    const openings = totalLF > 0 ? Math.ceil(totalLF / (run.sectionLengthFt || 6)) : 0;
+    const totalCorners = (run.corners90 || 0) + (run.corners45 || 0);
+    if (totalCorners > Math.max(0, openings - 1)) {
+      errors.push(`Run ${i+1}: ${totalCorners} corners declared but only ${Math.max(0, openings-1)} inline post slots exist for this run length. Add length or remove corners.`);
+    }
+    // Wall mount kit only supported by Impression
+    if (run.wallTerminations > 0 && run.collection !== "impression") {
+      errors.push(`Run ${i+1}: Wall Mount Kit only available for Impression Rail Express (collection: ${run.collection}).`);
+    }
   });
   return errors;
 }
@@ -5137,159 +5338,502 @@ function resolveBalusterPackSKU(run) {
   return null;
 }
 
+// ─── Railing helpers (hybrid level+stair run model) ────────────────────
+
+// Decompose a run into level + stair portions and structural counts.
+// Back-compat: if levelLengthFt/stairLengthFt are missing, derive from lengthFt + hasStair.
+function _railRunTally(run) {
+  const secLen = run.sectionLengthFt || 6;
+  // Resolve portions (new model first, fall back to legacy lengthFt)
+  let levelLF = (run.levelLengthFt != null) ? run.levelLengthFt : (run.hasStair ? 0 : (run.lengthFt || 0));
+  let stairLF = (run.stairLengthFt != null) ? run.stairLengthFt : (run.hasStair ? (run.lengthFt || 0) : 0);
+  const hasStair = stairLF > 0;
+  const hasLevel = levelLF > 0;
+
+  const levelOpenings = hasLevel ? Math.ceil(levelLF / secLen) : 0;
+  const stairOpenings = hasStair ? Math.ceil(stairLF / secLen) : 0;
+  const totalOpenings = levelOpenings + stairOpenings;
+  // Total posts = openings + 1 (one extra end), regardless of hybrid (transition shared)
+  const wallEnds = Math.max(0, Math.min(2, run.wallTerminations || 0));
+  const totalPosts = Math.max(0, totalOpenings + 1 - wallEnds);
+
+  // Corners replace inline-level slots — they're not additional posts
+  const c90 = Math.max(0, run.corners90 || 0);
+  const c45 = Math.max(0, run.corners45 || 0);
+
+  // Breakdown of post types (free end + inline + corner90 + corner45 in level; stair-end + stair-inline)
+  // Wall ends consume free ends first.
+  const levelFreeEnds = hasLevel ? Math.max(0, (hasStair ? 1 : 2) - wallEnds) : 0;
+  const stairFreeEnds = hasStair ? Math.max(0, (hasLevel ? 1 : 2) - Math.max(0, wallEnds - (hasLevel ? 1 : 0))) : 0;
+  // Inline counts (after subtracting end posts and corners from each portion's post pool)
+  const levelInline = hasLevel ? Math.max(0, levelOpenings - 1 - c90 - c45) : 0;
+  const stairInline = hasStair ? Math.max(0, stairOpenings - 1) : 0;
+  const transition = (hasLevel && hasStair) ? 1 : 0;
+
+  return {
+    levelLF, stairLF, hasStair, hasLevel,
+    levelOpenings, stairOpenings, totalOpenings,
+    totalPosts, wallEnds,
+    posts: {
+      levelEnd: levelFreeEnds,        // free ends in level portion
+      levelInline,
+      corner90: c90,
+      corner45: c45,
+      transition,                     // shared post at level/stair boundary
+      stairEnd: stairFreeEnds,        // free ends in stair portion
+      stairInline,
+      wallMount: wallEnds
+    }
+  };
+}
+
+// Specialty IRE Horizontal Cable post SKU resolver — by post-type
+function _ireHorizCablePostSKU(height_in, isStairTransition, postType, colorCode) {
+  // 36" system: deck posts at 38", stair posts at 43"
+  // 42" system: deck posts at 43", stair posts at 48"
+  const isLevel = !isStairTransition && (postType === "end" || postType === "inline" || postType === "corner90");
+  const baseHeight = isLevel ? (height_in === 36 ? 38 : 43)
+                             : (height_in === 36 ? 43 : 48);
+  if (postType === "corner90") return `AZTIXHC90PK${baseHeight}${colorCode}`;
+  if (postType === "end")      return `AZTIXHCEPK${baseHeight}${colorCode}`;
+  if (postType === "inline")   return `AZTIXHCIPK${baseHeight}${colorCode}`;
+  if (postType === "stairEnd") return `AZTIXHCESPK${baseHeight}${colorCode}`;
+  if (postType === "stairInline") return `AZTIXHCISPK${baseHeight}${colorCode}`;
+  return null;
+}
+
+// Round a needed cable length up to the next available IRE single-cable kit (10/20/40/60)
+function _ireCableKitLengthFor(neededFt) {
+  if (neededFt <= 10) return 10;
+  if (neededFt <= 20) return 20;
+  if (neededFt <= 40) return 40;
+  return 60; // 60' max per kit
+}
+
 function countRailing({ runs = [] }) {
   const allBom = [];
+  // Project-level accumulators (emitted once after the loop)
+  const projectAccessories = { needAcc: false, needCableTools: false, needJig: false, color: "B" };
 
   runs.forEach((run, idx) => {
-    const sectionCount = Math.ceil(run.lengthFt / run.sectionLengthFt);
-    const postsForRun = postCount(run.lengthFt, 6);
     const collInfo = CATALOG.railing[run.material]?.[run.collection];
     if (!collInfo) return;
+    const tally = _railRunTally(run);
+    const totalOpenings = tally.totalOpenings;
+    if (totalOpenings === 0) return;
 
-    // Rail panels / sections
-    const panelLabel = run.hasStair ? "Stair Panel" : "Level Panel";
-    const realPanelSKU = resolveRailingPanelSKU(run);
-    allBom.push(makeBOMLine({
-      category: "railing",
-      description: `Run ${idx+1} - ${collInfo.label} ${run.height}" ${panelLabel} (${run.sectionLengthFt}', ${prettifyColor(run.color)}, ${run.infill})`,
-      sku: realPanelSKU || `${run.collection}-${run.height}-${run.sectionLengthFt}-${run.infill}-${run.color}`,
-      qty_raw: sectionCount,
-      unit: "pcs"
-    }));
+    const cc = _colorCode(run.color);
+    const infillObj = collInfo.infills?.find(i => i.id === run.infill);
+    const isHorizCable = run.collection === "impression" && run.infill === "horiz_cable";
+    const isVertCable  = run.collection === "impression" && run.infill === "vert_cable";
+    const isClassicCableRail = run.collection === "classic" && run.infill === "cable";
 
-    // Top rail (separate for Classic Composite, Impression; integral for others)
-    const integralTopRails = ["statement", "pinnacle", "advantage", "fulton"];
-    if (!integralTopRails.includes(run.collection)) {
-      const realTopSKU = resolveRailingTopRailSKU(run);
+    // ─── Panels per portion (level + stair separately) ──────────────────
+    function emitPanels(portionLabel, openings) {
+      if (openings === 0) return;
+      const portionRun = { ...run, hasStair: portionLabel === "Stair", sectionLengthFt: run.sectionLengthFt };
+      const realPanelSKU = resolveRailingPanelSKU(portionRun);
       allBom.push(makeBOMLine({
         category: "railing",
-        description: `Run ${idx+1} - ${run.topRail} top rail (${run.sectionLengthFt}', ${prettifyColor(run.color)})`,
-        sku: realTopSKU || `${run.collection}-${run.topRail}-${run.sectionLengthFt}-${run.color}`,
-        qty_raw: sectionCount,
+        description: `Run ${idx+1} ${portionLabel} - ${collInfo.label} ${run.height}" ${portionLabel} Panel (${run.sectionLengthFt}', ${prettifyColor(run.color)}, ${run.infill})`,
+        sku: realPanelSKU || `${run.collection}-${run.height}-${run.sectionLengthFt}-${run.infill}-${portionLabel}-${run.color}`,
+        qty_raw: openings,
         unit: "pcs"
       }));
     }
+    emitPanels("Level", tally.levelOpenings);
+    emitPanels("Stair", tally.stairOpenings);
 
-    // Balusters — only for collections that sell separately (Classic Composite, Reliance)
-    const infillObj = collInfo.infills?.find(i => i.id === run.infill);
-    if (infillObj && infillObj.per_pack && infillObj.baluster_qty) {
-      const balQtyKey = String(run.sectionLengthFt) + (run.hasStair && infillObj.baluster_qty[run.sectionLengthFt + "S"] ? "S" : "");
-      const balPerSection = infillObj.baluster_qty[balQtyKey] || infillObj.baluster_qty[String(run.sectionLengthFt)] || 0;
-      const totalBalusters = sectionCount * balPerSection;
-      const packs = Math.ceil(totalBalusters / infillObj.per_pack);
-      const realBalSKU = resolveBalusterPackSKU(run);
-      allBom.push(makeBOMLine({
-        category: "railing",
-        description: `Run ${idx+1} - ${infillObj.label} baluster pack (${infillObj.per_pack}/pk)`,
-        sku: realBalSKU || `BAL-${run.collection}-${run.infill}-${run.color}`,
-        qty_raw: packs,
-        unit: "packs",
-        notes: `${totalBalusters} balusters needed`
-      }));
+    // ─── Top rail per portion (Classic Composite, Impression — separate SKU) ─
+    const integralTopRails = ["statement", "pinnacle", "advantage", "fulton"];
+    if (!integralTopRails.includes(run.collection)) {
+      function emitTopRail(portionLabel, openings) {
+        if (openings === 0) return;
+        const portionRun = { ...run, hasStair: portionLabel === "Stair" };
+        const realTopSKU = resolveRailingTopRailSKU(portionRun);
+        allBom.push(makeBOMLine({
+          category: "railing",
+          description: `Run ${idx+1} ${portionLabel} - ${run.topRail} top rail (${run.sectionLengthFt}', ${prettifyColor(run.color)})`,
+          sku: realTopSKU || `${run.collection}-${run.topRail}-${run.sectionLengthFt}-${portionLabel}-${run.color}`,
+          qty_raw: openings,
+          unit: "pcs"
+        }));
+      }
+      emitTopRail("Level", tally.levelOpenings);
+      emitTopRail("Stair", tally.stairOpenings);
     }
 
-    // Post sleeves (or post kits for Impression / Fulton)
+    // ─── Balusters (Classic Composite, Reliance — sold separately) ─────
+    if (infillObj && infillObj.per_pack && infillObj.baluster_qty) {
+      const balPerSection = infillObj.baluster_qty[String(run.sectionLengthFt)] || 0;
+      const totalBalusters = totalOpenings * balPerSection;
+      if (totalBalusters > 0) {
+        const packs = Math.ceil(totalBalusters / infillObj.per_pack);
+        const realBalSKU = resolveBalusterPackSKU(run);
+        allBom.push(makeBOMLine({
+          category: "railing",
+          description: `Run ${idx+1} - ${infillObj.label} baluster pack (${infillObj.per_pack}/pk)`,
+          sku: realBalSKU || `BAL-${run.collection}-${run.infill}-${run.color}`,
+          qty_raw: packs,
+          unit: "packs",
+          notes: `${totalBalusters} balusters needed across ${totalOpenings} openings`
+        }));
+      }
+    }
+
+    // ─── Posts — by type ────────────────────────────────────────────────
     const sleeveOwner = _postOwner(run.material, run.collection) || collInfo;
     const sleeveObj = sleeveOwner.sleeves?.find(s => s.size === run.postSize);
     const isPostKit = sleeveObj?.includes_cap_and_skirt || sleeveObj?.type === "kit";
-    // "Sleeve" style = cosmetic cover that requires an internal structural post.
-    // TimberTech sells the Secure Mount Post (AZTSMP3642) for this purpose.
-    // Kit-style posts (Impression 3x3 kits, Fulton, OTP, fascia-mount) have integral structure.
-    const sleeveNeedsSMP = sleeveObj && !sleeveObj.type;   // no `type` field → cosmetic sleeve
-    const realPostSKU = resolveRailingPostSKU(run);
-    allBom.push(makeBOMLine({
-      category: "railing",
-      description: `Run ${idx+1} - ${run.postSize} Post ${isPostKit ? "Kit (incl. cap+skirt)" : "sleeve"} (${prettifyColor(run.color)})`,
-      sku: realPostSKU || `POST-${run.collection}-${run.postSize}-${run.color}`,
-      qty_raw: postsForRun,
-      unit: "pcs"
-    }));
+    // Cable rail is NOT compatible with the Secure Mount Post (install guide pg 3).
+    // When the infill is cable, we still need a structural post — but it must be a
+    // real 4x4 PT post inside the sleeve, not the AZTSMP3642.
+    const cableIncompatibleWithSMP = !!infillObj?.incompatible_with_smp;
+    const sleeveNeedsSMP = sleeveObj && !sleeveObj.type && !cableIncompatibleWithSMP;
 
-    // TimberTech Secure Mount Post (internal structural post for sleeve installs)
-    if (sleeveNeedsSMP) {
+    if (isHorizCable) {
+      // Specialty post kits per type — IRE horizontal cable only
+      function emitHorizPost(label, count, postType, isStairTransition) {
+        if (count === 0) return;
+        const sku = _ireHorizCablePostSKU(run.height, isStairTransition, postType, cc);
+        allBom.push(makeBOMLine({
+          category: "railing",
+          description: `Run ${idx+1} - ${label} (${prettifyColor(run.color)})`,
+          sku: sku || `IRE-HC-${postType}-${run.height}-${run.color}`,
+          qty_raw: count,
+          unit: "kits"
+        }));
+      }
+      emitHorizPost("3x3 Level End Post Kit",        tally.posts.levelEnd,    "end",        false);
+      emitHorizPost("3x3 Level Inline Post Kit",     tally.posts.levelInline + tally.posts.corner45, "inline", false);
+      emitHorizPost("3x3 90deg Corner Post Kit (w/ insert)", tally.posts.corner90, "corner90",  false);
+      emitHorizPost("3x3 Stair Transition (Stair-End) Kit",  tally.posts.transition, "stairEnd", true);
+      emitHorizPost("3x3 Stair End Post Kit",         tally.posts.stairEnd,    "stairEnd",   true);
+      emitHorizPost("3x3 Stair Inline Post Kit",      tally.posts.stairInline, "stairInline",true);
+      // 90deg Corner Post Insert (sold separately from corner post kit)
+      if (tally.posts.corner90 > 0) {
+        const insertSKU = run.height === 36 ? "AZTIXHC90PI36" : "AZTIXHC90PI42";
+        allBom.push(makeBOMLine({
+          category: "railing",
+          description: `Run ${idx+1} - 3x3 90deg Corner Post Insert`,
+          sku: insertSKU,
+          qty_raw: tally.posts.corner90,
+          unit: "pcs",
+          notes: "Sold separately from corner post kit"
+        }));
+      }
+    } else {
+      // All other systems: single post-kit SKU emitted at the total count.
+      // tally.totalPosts already excludes wall-mounted boundaries (those use a wall mount kit
+      // emitted separately below). Do NOT subtract wallMount again here.
+      // (Future: differentiate end/inline/corner per-collection if SKUs diverge.)
+      const totalPostsThisRun = tally.totalPosts;
+      if (totalPostsThisRun > 0) {
+        const realPostSKU = resolveRailingPostSKU(run);
+        allBom.push(makeBOMLine({
+          category: "railing",
+          description: `Run ${idx+1} - ${run.postSize} Post ${isPostKit ? "Kit (incl. cap+skirt)" : "sleeve"} (${prettifyColor(run.color)})`,
+          sku: realPostSKU || `POST-${run.collection}-${run.postSize}-${run.color}`,
+          qty_raw: totalPostsThisRun,
+          unit: "pcs"
+        }));
+
+        if (sleeveNeedsSMP) {
+          allBom.push(makeBOMLine({
+            category: "hardware",
+            description: `Run ${idx+1} - 4" Secure Mount Post (internal, adjustable 36/42)`,
+            sku: "AZTSMP3642",
+            qty_raw: totalPostsThisRun,
+            unit: "pcs",
+            notes: "Required internal structural post for any post sleeve"
+          }));
+          allBom.push(makeBOMLine({
+            category: "hardware",
+            description: `Run ${idx+1} - Deck Mounting Kit for Secure Mount Post`,
+            sku: "AZTSMPDMK",
+            qty_raw: totalPostsThisRun,
+            unit: "kits"
+          }));
+          if (run.postSize === "6x6") {
+            allBom.push(makeBOMLine({
+              category: "hardware",
+              description: `Run ${idx+1} - 6" Secure Mount Post Adapter (for 6x6 sleeves)`,
+              sku: "AZTSMP6ADAPTOR",
+              qty_raw: totalPostsThisRun,
+              unit: "pcs"
+            }));
+          }
+        } else if (cableIncompatibleWithSMP && sleeveObj && !sleeveObj.type) {
+          // Cable rail in a sleeve-style post needs a real PT 4x4 inside (SMP not rated for cable tension).
+          // 36"/42" deck posts: 4' PT is sufficient. Stair posts (incl. transition) need 8' cut to angle.
+          if (tally.hasLevel) {
+            // Level portion excludes the transition post — that one is physically at the stair.
+            const levelPostCount = (tally.posts.levelEnd || 0) + (tally.posts.levelInline || 0) + (tally.posts.corner90 || 0) + (tally.posts.corner45 || 0);
+            if (levelPostCount > 0) {
+              const lenFt = run.height >= 42 ? 8 : 4;
+              allBom.push(makeBOMLine({
+                category: "framing",
+                description: `Run ${idx+1} Level - 4x4 PT Structural Post (${lenFt}', for cable rail inside ${run.postSize} sleeve)`,
+                sku: `4x4-${lenFt}-PT`,
+                qty_raw: levelPostCount,
+                unit: "pcs",
+                notes: "Cable rail incompatible with Secure Mount Post per install guide; use real PT structural post"
+              }));
+            }
+          }
+          if (tally.hasStair) {
+            // Stair portion INCLUDES the transition post (it lives at the stair angle).
+            const stairPostCount = (tally.posts.stairEnd || 0) + (tally.posts.stairInline || 0) + (tally.posts.transition || 0);
+            if (stairPostCount > 0) {
+              allBom.push(makeBOMLine({
+                category: "framing",
+                description: `Run ${idx+1} Stair - 4x4 PT Structural Post (8', cut to stair angle, for cable rail inside ${run.postSize} sleeve)`,
+                sku: `4x4-8-PT`,
+                qty_raw: stairPostCount,
+                unit: "pcs",
+                notes: "Cable rail incompatible with Secure Mount Post per install guide; use real PT structural post"
+              }));
+            }
+          }
+          // Edge case: pure-stair run (no level) — emit stair posts only.
+          if (!tally.hasLevel && !tally.hasStair) {
+            // shouldn't happen since totalOpenings===0 returns early
+          }
+        }
+
+        // Caps + skirts (only if not bundled in post kit)
+        if (!isPostKit && run.postCap) {
+          const realCapSKU = resolveRailingCapSKU(run);
+          allBom.push(makeBOMLine({
+            category: "railing",
+            description: `Run ${idx+1} - ${run.postSize} ${run.postCap} cap (${prettifyColor(run.color)})`,
+            sku: realCapSKU || `CAP-${run.collection}-${run.postSize}-${run.postCap}-${run.color}`,
+            qty_raw: totalPostsThisRun,
+            unit: "pcs"
+          }));
+        }
+        if (!isPostKit && run.postSkirt) {
+          const realSkirtSKU = resolveRailingSkirtSKU(run);
+          allBom.push(makeBOMLine({
+            category: "railing",
+            description: `Run ${idx+1} - ${run.postSize} ${run.postSkirt} skirt (${prettifyColor(run.color)})`,
+            sku: realSkirtSKU || `SKIRT-${run.collection}-${run.postSize}-${run.postSkirt}-${run.color}`,
+            qty_raw: totalPostsThisRun,
+            unit: "pcs"
+          }));
+        }
+      }
+    }
+
+    // ─── Wall mount kits (replace end posts at wall terminations) ────────
+    if (tally.posts.wallMount > 0 && run.collection === "impression") {
       allBom.push(makeBOMLine({
-        category: "hardware",
-        description: `Run ${idx+1} - 4" Secure Mount Post (internal, adjustable 36/42)`,
-        sku: "AZTSMP3642",
-        qty_raw: postsForRun,
-        unit: "pcs",
-        notes: "Required internal structural post for any post sleeve"
-      }));
-      allBom.push(makeBOMLine({
-        category: "hardware",
-        description: `Run ${idx+1} - Deck Mounting Kit for Secure Mount Post`,
-        sku: "AZTSMPDMK",
-        qty_raw: postsForRun,
+        category: "railing",
+        description: `Run ${idx+1} - Wall Mount Kit`,
+        sku: `AZTIXWBKTKIT${cc}`,
+        qty_raw: tally.posts.wallMount,
         unit: "kits"
       }));
-      // 6x6 sleeves need the 6" adapter
-      if (run.postSize === "6x6") {
+    }
+
+    // ─── Corner brackets ────────────────────────────────────────────────
+    // IRE: 45-deg corners need the 22.5-deg bracket kit (uses pair of 22.5 brackets to make 45)
+    if (tally.posts.corner45 > 0 && run.collection === "impression") {
+      const bracketSKU = run.infill === "glass" ? `AZTIXGBKT22KIT${cc}` : "AZTIXBKT22KIT";
+      allBom.push(makeBOMLine({
+        category: "railing",
+        description: `Run ${idx+1} - 22.5deg Angle Bracket Kit (for 45deg corners)`,
+        sku: bracketSKU,
+        qty_raw: tally.posts.corner45,
+        unit: "kits"
+      }));
+    }
+
+    // ─── Cable kits ─────────────────────────────────────────────────────
+    if (isHorizCable && infillObj) {
+      const cablesPerHeight = infillObj.cable_count_by_height?.[run.height] || 0;
+      function emitCableForPortion(portionLabel, portionLF) {
+        if (portionLF <= 0 || cablesPerHeight === 0) return;
+        const kitLen = _ireCableKitLengthFor(portionLF);
+        const kitSKU = `AZTIXHC${kitLen}CABLE`;
         allBom.push(makeBOMLine({
-          category: "hardware",
-          description: `Run ${idx+1} - 6" Secure Mount Post Adapter (for 6x6 sleeves)`,
-          sku: "AZTSMP6ADAPTOR",
-          qty_raw: postsForRun,
+          category: "railing",
+          description: `Run ${idx+1} ${portionLabel} - 1/8" Cable Kit ${kitLen}' (${cablesPerHeight} cables for ${run.height}" rail)`,
+          sku: kitSKU,
+          qty_raw: cablesPerHeight,
+          unit: "kits",
+          notes: `Cable run = ${portionLF} LF; ${cablesPerHeight} cables per ${run.height}" section`
+        }));
+      }
+      emitCableForPortion("Level", tally.levelLF);
+      emitCableForPortion("Stair", tally.stairLF);
+      // Stair angle washer at stair-end terminations
+      if (tally.posts.stairEnd > 0 || tally.posts.transition > 0) {
+        allBom.push(makeBOMLine({
+          category: "railing",
+          description: `Run ${idx+1} - Stair Angle Washer (for cables at stair end)`,
+          sku: "AZTIXHCSAW",
+          qty_raw: cablesPerHeight * (tally.posts.stairEnd + tally.posts.transition),
           unit: "pcs"
         }));
       }
     }
 
-    // Caps + skirts (only if not bundled in post kit)
-    if (!isPostKit && run.postCap) {
-      const realCapSKU = resolveRailingCapSKU(run);
-      allBom.push(makeBOMLine({
-        category: "railing",
-        description: `Run ${idx+1} - ${run.postSize} ${run.postCap} cap (${prettifyColor(run.color)})`,
-        sku: realCapSKU || `CAP-${run.collection}-${run.postSize}-${run.postCap}-${run.color}`,
-        qty_raw: postsForRun,
-        unit: "pcs"
-      }));
-    }
-    if (!isPostKit && run.postSkirt) {
-      const realSkirtSKU = resolveRailingSkirtSKU(run);
-      allBom.push(makeBOMLine({
-        category: "railing",
-        description: `Run ${idx+1} - ${run.postSize} ${run.postSkirt} skirt (${prettifyColor(run.color)})`,
-        sku: realSkirtSKU || `SKIRT-${run.collection}-${run.postSize}-${run.postSkirt}-${run.color}`,
-        qty_raw: postsForRun,
-        unit: "pcs"
-      }));
+    if (isClassicCableRail && infillObj) {
+      // Hardware kit: one per cable RUN (each portion = one run since angle changes)
+      const hwSKU = infillObj.hardware_kit_sku_by_height?.[run.height];
+      const intBalSKU = infillObj.intermediate_baluster_sku_by_height?.[run.height];
+      const intStairBalSKU = infillObj.intermediate_stair_baluster_sku_by_height?.[run.height];
+      const cablesPerHeight = infillObj.cable_count_by_height?.[run.height] || 0;
+      // Install guide pg 4: balusters per panel — 6'=1, 8'=2, 10'=3
+      const balsPerPanel = infillObj.balusters_per_section?.[run.sectionLengthFt] || 1;
+
+      function emitClassicCableForPortion(portionLabel, portionLF, portionOpenings, isStair) {
+        if (portionLF <= 0) return;
+        // Hardware kit — one per cable RUN
+        if (hwSKU) {
+          allBom.push(makeBOMLine({
+            category: "railing",
+            description: `Run ${idx+1} ${portionLabel} - CableRail Hardware Kit (${cablesPerHeight} cables for ${run.height}")`,
+            sku: hwSKU,
+            qty_raw: 1,
+            unit: "kits"
+          }));
+        }
+        // Intermediate baluster — quantity scales with panel length per install guide
+        const balSKU = isStair ? intStairBalSKU : intBalSKU;
+        if (balSKU && portionOpenings > 0) {
+          const totalBalusters = portionOpenings * balsPerPanel;
+          allBom.push(makeBOMLine({
+            category: "railing",
+            description: `Run ${idx+1} ${portionLabel} - CableRail Intermediate ${isStair?"Stair ":""}Baluster`,
+            sku: balSKU,
+            qty_raw: totalBalusters,
+            unit: "pcs",
+            notes: `${balsPerPanel} per ${run.sectionLengthFt}' panel x ${portionOpenings} openings`
+          }));
+        }
+      }
+      emitClassicCableForPortion("Level", tally.levelLF, tally.levelOpenings, false);
+      emitClassicCableForPortion("Stair", tally.stairLF, tally.stairOpenings, true);
+
+      // Aluminum top support rail — required for 10' x 42" panels (install guide pg 6)
+      const aluTopSKU = infillObj.aluminum_top_support_sku_by_length?.[run.sectionLengthFt];
+      if (aluTopSKU && run.height === 42) {
+        allBom.push(makeBOMLine({
+          category: "railing",
+          description: `Run ${idx+1} - 10' Aluminum Top Support Rail (required for 10'x42" cable)`,
+          sku: aluTopSKU,
+          qty_raw: totalOpenings,
+          unit: "pcs",
+          notes: "10' x 42\" panels require aluminum support per install guide pg 6"
+        }));
+      }
+
+      // Bulk cable: total LF = cables_per_height * total_run_LF * 1.05 (5% waste)
+      const totalCableLF = Math.ceil((tally.levelLF + tally.stairLF) * cablesPerHeight * 1.05);
+      const bulkSKUs = infillObj.bulk_cable_skus || {};
+      // Use 500' reels for runs > 250 LF; else 100' reels
+      const use500 = totalCableLF > 250;
+      const reelLen = use500 ? 500 : 100;
+      const reelSKU = bulkSKUs[reelLen];
+      if (reelSKU) {
+        const reels = Math.ceil(totalCableLF / reelLen);
+        allBom.push(makeBOMLine({
+          category: "railing",
+          description: `Run ${idx+1} - Stainless Steel Cable (${reelLen}' reel)`,
+          sku: reelSKU,
+          qty_raw: reels,
+          unit: "reels",
+          notes: `~${totalCableLF} LF needed (${cablesPerHeight} cables x ${tally.levelLF + tally.stairLF} LF + 5% waste)`
+        }));
+      }
+      // Pivot hardware for 45deg corners (36" only)
+      if (tally.posts.corner45 > 0 && infillObj.pivot_hardware_sku_by_height?.[run.height]) {
+        allBom.push(makeBOMLine({
+          category: "railing",
+          description: `Run ${idx+1} - CableRail Pivot Hardware Kit (for 45deg corners)`,
+          sku: infillObj.pivot_hardware_sku_by_height[run.height],
+          qty_raw: tally.posts.corner45,
+          unit: "kits"
+        }));
+      }
+      projectAccessories.needCableTools = true;
     }
 
-    // Decorative collar (Impression only)
-    if (run.collar && collInfo.collars) {
+    // ─── Bracket kits — 1 per panel ─────────────────────────────────────
+    const realBrktSKU = resolveRailingBracketSKU(run);
+    function emitBracket(portionLabel, openings, isStair) {
+      if (openings === 0) return;
+      const portionRun = { ...run, hasStair: isStair };
+      const sku = resolveRailingBracketSKU(portionRun) || realBrktSKU;
       allBom.push(makeBOMLine({
         category: "railing",
-        description: `Run ${idx+1} - ${run.collar} decorative collar kit (${run.hasStair?"stair":"level"})`,
-        sku: `COLLAR-${run.collar}-${run.hasStair?"stair":"level"}-${run.color}`,
-        qty_raw: sectionCount,
+        description: `Run ${idx+1} ${portionLabel} - bracket kit`,
+        sku: sku || `BRKT-${run.collection}-${portionLabel.toLowerCase()}-${run.color}`,
+        qty_raw: openings,
         unit: "kits"
       }));
     }
+    emitBracket("Level", tally.levelOpenings, false);
+    emitBracket("Stair", tally.stairOpenings, true);
 
-    // Bracket kits — 1 per panel
-    const realBrktSKU = resolveRailingBracketSKU(run);
-    allBom.push(makeBOMLine({
-      category: "railing",
-      description: `Run ${idx+1} - ${run.hasStair?"Stair":"Level"} bracket kit`,
-      sku: realBrktSKU || `BRKT-${run.collection}-${run.hasStair?"stair":"level"}-${run.color}`,
-      qty_raw: sectionCount,
-      unit: "kits"
-    }));
-
-    // Foot block kit (Fulton 8' panels, Statement, Pinnacle, Reliance)
+    // ─── Foot block (legacy: Fulton 8' / Statement / Pinnacle / Reliance) ─
     if ((run.collection === "fulton" && collInfo.eight_ft_requires_foot_block && run.sectionLengthFt === 8) ||
         run.collection === "statement" || run.collection === "pinnacle" || run.collection === "reliance") {
       allBom.push(makeBOMLine({
         category: "railing",
         description: `Run ${idx+1} - Foot block kit`,
         sku: `FOOTBLOCK-${run.collection}-${run.color}`,
-        qty_raw: sectionCount,
+        qty_raw: totalOpenings,
         unit: "kits"
       }));
     }
 
-    // Gates (if defined)
+    // ─── ADA handrail (if specified on a hybrid/stair run) ──────────────
+    if (run.adaHandrail && tally.stairLF > 0) {
+      // 1 LF of handrail per LF of stair (with overhang for graspability)
+      const handrailLF = Math.ceil(tally.stairLF + 2);   // +2 LF for overhang per IRC
+      const pipesNeeded = Math.ceil(handrailLF / 8);     // 94" = 7.83' aluminum pipes; round to 8' for sizing
+      if (run.adaHandrail === "aluminum") {
+        allBom.push(makeBOMLine({
+          category: "railing",
+          description: `Run ${idx+1} - ADA Aluminum Handrail Pipe 1.5"x94" (${prettifyColor(run.color)})`,
+          sku: `AZTIXADA94R${cc}`,
+          qty_raw: pipesNeeded,
+          unit: "pcs",
+          notes: `~${handrailLF} LF of handrail (stair ${tally.stairLF} LF + 2 LF overhang)`
+        }));
+        allBom.push(makeBOMLine({
+          category: "railing",
+          description: `Run ${idx+1} - ADA Aluminum Support Bracket`,
+          sku: `AZTIXADAMSB${cc}`,
+          qty_raw: Math.max(2, Math.ceil(handrailLF / 4)),  // bracket every 4 LF, min 2
+          unit: "kits"
+        }));
+      } else {
+        // Composite ADA: 104" sections, White/Black only
+        const adaColor = (run.color === "black" || run.color === "matte_black") ? "B" : "W";
+        const sections104 = Math.ceil(handrailLF / 8.67);  // 104" = 8.67'
+        allBom.push(makeBOMLine({
+          category: "railing",
+          description: `Run ${idx+1} - ADA Composite 104" Grab Rail`,
+          sku: `AZTADA104RSA${adaColor}`,
+          qty_raw: sections104,
+          unit: "pcs",
+          notes: `~${handrailLF} LF of handrail`
+        }));
+        allBom.push(makeBOMLine({
+          category: "railing",
+          description: `Run ${idx+1} - ADA Hand Rail Bracket Kit`,
+          sku: `AZTADAHRBK${adaColor}`,
+          qty_raw: Math.max(2, Math.ceil(handrailLF / 4)),
+          unit: "kits"
+        }));
+      }
+    }
+
+    // ─── Gates (if defined) ─────────────────────────────────────────────
     if (run.gateCount && run.gateOpening) {
       allBom.push(makeBOMLine({
         category: "railing",
@@ -5299,7 +5843,59 @@ function countRailing({ runs = [] }) {
         unit: "kits"
       }));
     }
+
+    // Tag project-level needs
+    if (run.collection === "impression") {
+      projectAccessories.needAcc = true;
+      projectAccessories.needJig = true;
+      projectAccessories.color = cc;
+    }
   });
+
+  // ─── Project-level accessories (emit once per project, not per run) ─────
+  if (projectAccessories.needAcc) {
+    allBom.push(makeBOMLine({
+      category: "railing",
+      description: `Project - Impression Touch-Up Paint & Bracket Jig`,
+      sku: `AZTIXACCKIT${projectAccessories.color}`,
+      qty_raw: 1,
+      unit: "kits",
+      notes: "Order 1+ per job per TimberTech recommendation"
+    }));
+  }
+  if (projectAccessories.needJig) {
+    allBom.push(makeBOMLine({
+      category: "railing",
+      description: `Project - Impression Install Jig`,
+      sku: "AZTIXJIG",
+      qty_raw: 1,
+      unit: "pcs"
+    }));
+  }
+  if (projectAccessories.needCableTools) {
+    allBom.push(makeBOMLine({
+      category: "railing",
+      description: `Project - CableRail Accessory Kit`,
+      sku: "AZTCRACCKIT",
+      qty_raw: 1,
+      unit: "kits"
+    }));
+    allBom.push(makeBOMLine({
+      category: "railing",
+      description: `Project - CableRail Cutter`,
+      sku: "AZTCRCUTTER",
+      qty_raw: 1,
+      unit: "pcs",
+      notes: "One per crew, reusable across jobs"
+    }));
+    allBom.push(makeBOMLine({
+      category: "railing",
+      description: `Project - CableRail Wrench Wheel`,
+      sku: "AZTCRWRWH",
+      qty_raw: 1,
+      unit: "pcs"
+    }));
+  }
 
   return { bom: allBom };
 }
@@ -5622,9 +6218,13 @@ function rollupBOM(input) {
     bom.push(...selectLateralHardware(input.attachment, totalPosts, input.H_in, postHeightFt));
     bom.push(...selectKneeBracing(totalPosts, postHeightFt));
 
+    // Joist OC: MAX boards (1.5" thick PVC) allow up to 24" OC; diagonal needs 12";
+    // standard residential is 16". Default to 16 unless MAX is being used.
+    const joistOC = (mainProfile?.id === "max_2x6") ? 16 : 16;   // future: drop to 12 for diagonal
     blocking = countBlocking(input.P, input.W, input.pf?.rows || 1,
       pfProfile?.actual_w_in || 5.5, input.breakers?.count || 0,
-      brkProfile?.actual_w_in || 5.5, input.P);
+      brkProfile?.actual_w_in || 5.5, input.P,
+      joistOC, joistInfo?.size || "2x10");
     bom.push(...blocking.bom);
   } else {
     // Resurface mode — annotate that framing is preserved
@@ -5712,11 +6312,17 @@ function rollupBOM(input) {
   });
   bom.push(...brk.bom);
 
-  // Stairs
+  // Stairs — resolve a STAIR-specific profile (typically sq_1x6) since treads must
+  // be face-fastened to stringers. Using mainProfile (grv_1x6 for field) emits grooved
+  // boards which can't be face-screwed and may have lengths the SS variant doesn't sell.
+  const stairProfile = (mainProfile && mainProfile.id === "max_2x6")
+    ? resolveDeckingProfile({ series: input.main.series, collection: input.main.collection, use: "stair", profileId: "max_2x6", color: mainColorForResolve })
+    : resolveDeckingProfile({ series: input.main.series, collection: input.main.collection, use: "stair", color: mainColorForResolve });
   const stairResults = countStairs({
     stairs: input.stairs || [], H_in: input.H_in,
-    mainProfile, riserProfile, fasciaProfile,
-    mainColor, riserColor, fasciaColor
+    mainProfile, stairProfile, riserProfile, fasciaProfile,
+    mainColor, riserColor, fasciaColor,
+    collectionKey: input.main.collection, seriesKey: input.main.series
   });
   bom.push(...stairResults.bom);
 
@@ -6060,19 +6666,24 @@ function populateColors(seriesEl, collectionEl, colorEl) {
   if (!coll) return;
   coll.colors.forEach(c => colorEl.appendChild(el("option", { value: c }, c)));
 }
-function populateWidths(seriesEl, collectionEl, widthEl) {
+function populateWidths(seriesEl, collectionEl, widthEl, colorEl) {
   const sv = seriesEl.value, cv = collectionEl.value;
+  const color = colorEl ? colorEl.value : null;
+  const previousValue = widthEl.value;
   clearOptions(widthEl, "- Select -");
   const coll = CATALOG.decking[sv]?.collections[cv];
   if (!coll) return;
-  // Show only field-capable profiles. Use a stable id (profile key) as the value
-  // so MAX (5.5" x 1.5") and standard (5.5" x 1.0") are distinct entries.
+  // Show only profiles available for the chosen color. When color is unset,
+  // show every profile in the collection (so the dropdown isn't empty).
   const seen = new Set();
   Object.entries(coll.profiles).forEach(([id, p]) => {
-    // Field profiles only — grooved field boards (hidden fastener) for main pick
+    // Field-capable profiles only — grooved field boards (hidden fastener) for main pick
     if (!p.use.includes("field") && !p.use.includes("pf") && !p.use.includes("breaker")) return;
-    // Pick the grooved variant as the "field" option per width; SS used for PF/breaker
-    // De-duplicate: same actual_w_in + thick_in combo (one entry per physical board profile)
+    // Color-filter: drop profiles the chosen color doesn't support (e.g. Kona has no grv_1x6,
+    // no sq_1x8, no max_2x6 in Harvest).
+    if (color && p.colors_filter && !p.colors_filter.includes(color)) return;
+
+    // De-duplicate by physical board (width + thickness + sq/grv variant)
     const dedupKey = `${p.actual_w_in}|${p.thick_in}|${id.includes("grv") ? "grv" : "sq"}`;
     if (seen.has(dedupKey)) return;
     seen.add(dedupKey);
@@ -6082,10 +6693,16 @@ function populateWidths(seriesEl, collectionEl, widthEl) {
     else if (p.actual_w_in === 3.5)      label = `3.5" narrow`;
     else if (p.actual_w_in === 7.25)     label = `7.25" wide`;
     else                                 label = `${p.actual_w_in}" standard`;
-    // Suffix for whether grooved or square-shouldered
     if (id.includes("grv")) label += " (grooved)";
+    // Show available lengths in the label so user sees Kona = 16'/20' only, vs other colors
+    const lengths = (color && p.lengths_by_color && p.lengths_by_color[color]) || p.lengths_ft || [];
+    if (lengths.length) label += ` - ${lengths.join("'/")}'`;
     widthEl.appendChild(el("option", { value: id }, label));
   });
+  // Preserve previous selection if it's still valid for the new color
+  if (previousValue && [...widthEl.options].some(o => o.value === previousValue)) {
+    widthEl.value = previousValue;
+  }
 }
 
 // ─── Toggle "match main deck" ────────────────────
@@ -6108,10 +6725,15 @@ window.addEventListener("DOMContentLoaded", () => {
   });
   $("mainCollection").addEventListener("change", () => {
     populateColors($("mainSeries"), $("mainCollection"), $("mainColor"));
-    populateWidths($("mainSeries"), $("mainCollection"), $("mainWidth"));
+    populateWidths($("mainSeries"), $("mainCollection"), $("mainWidth"), $("mainColor"));
     recalc();
   });
-  $("mainColor").addEventListener("change", recalc);
+  $("mainColor").addEventListener("change", () => {
+    // Color change can change which widths/lengths are available (e.g. Kona has no grv_1x6,
+    // no 1x8, no MAX). Repopulate widths but preserve the user's selection if still valid.
+    populateWidths($("mainSeries"), $("mainCollection"), $("mainWidth"), $("mainColor"));
+    recalc();
+  });
   $("mainWidth").addEventListener("change", recalc);
 
   // PF / Breaker / Fascia / Drink toggle wiring (override sections)
@@ -6150,10 +6772,14 @@ window.addEventListener("DOMContentLoaded", () => {
       });
       cEl.addEventListener("change", () => {
         if (xEl) populateColors(sEl, cEl, xEl);
-        if (wEl) populateWidths(sEl, cEl, wEl);
+        if (wEl) populateWidths(sEl, cEl, wEl, xEl);
         recalc();
       });
-      if (xEl) xEl.addEventListener("change", recalc);
+      // Color-change re-filters widths (e.g. Kona has fewer options) and recalcs
+      if (xEl) xEl.addEventListener("change", () => {
+        if (wEl) populateWidths(sEl, cEl, wEl, xEl);
+        recalc();
+      });
       if (wEl) wEl.addEventListener("change", recalc);
     }
   });
@@ -6167,20 +6793,36 @@ function readForm() {
     width: parseFloat(d.querySelector("[data-stair-width]").value) || 0
   })).filter(s => s.width > 0);
 
-  const railingRuns = [...document.querySelectorAll("#railList .card")].map(d => ({
-    lengthFt: parseFloat(d.querySelector("[data-rail-length]").value) || 0,
-    hasStair: d.querySelector("[data-rail-stair]").value === "yes",
-    material: d.querySelector("[data-rail-material]").value,
-    collection: d.querySelector("[data-rail-collection]").value,
-    height: parseInt(d.querySelector("[data-rail-height]").value) || 36,
-    sectionLengthFt: parseInt(d.querySelector("[data-rail-section]").value) || 6,
-    topRail: d.querySelector("[data-rail-toprail]").value,
-    infill: d.querySelector("[data-rail-infill]").value,
-    postSize: d.querySelector("[data-rail-sleeve]").value,
-    postCap: d.querySelector("[data-rail-cap]").value,
-    postSkirt: d.querySelector("[data-rail-skirt]").value,
-    color: d.querySelector("[data-rail-color]").value
-  })).filter(r => r.lengthFt > 0 && r.material && r.collection);
+  const railingRuns = [...document.querySelectorAll("#railList .card")].map(d => {
+    const hasStair = d.querySelector("[data-rail-stair]").value === "yes";
+    const levelLengthFt = parseFloat(d.querySelector("[data-rail-level-length]")?.value) || 0;
+    const stairLengthFt = hasStair ? (parseFloat(d.querySelector("[data-rail-stair-length]")?.value) || 0) : 0;
+    return {
+      // New hybrid model: level + stair portions of one continuous run.
+      levelLengthFt,
+      stairLengthFt,
+      hasStair: hasStair && stairLengthFt > 0,
+      // Total kept for back-compat with code that hasn't been migrated yet
+      lengthFt: levelLengthFt + stairLengthFt,
+      // Structural counts that drive corner/wall hardware
+      corners90: parseInt(d.querySelector("[data-rail-corners-90]")?.value) || 0,
+      corners45: parseInt(d.querySelector("[data-rail-corners-45]")?.value) || 0,
+      wallTerminations: parseInt(d.querySelector("[data-rail-wall-ends]")?.value) || 0,
+      // ADA handrail spec (only relevant when hasStair is true)
+      adaHandrail: hasStair ? (d.querySelector("[data-rail-ada]")?.value || "") : "",
+      // Material / cosmetic selections
+      material: d.querySelector("[data-rail-material]").value,
+      collection: d.querySelector("[data-rail-collection]").value,
+      height: parseInt(d.querySelector("[data-rail-height]").value) || 36,
+      sectionLengthFt: parseInt(d.querySelector("[data-rail-section]").value) || 6,
+      topRail: d.querySelector("[data-rail-toprail]").value,
+      infill: d.querySelector("[data-rail-infill]").value,
+      postSize: d.querySelector("[data-rail-sleeve]").value,
+      postCap: d.querySelector("[data-rail-cap]").value,
+      postSkirt: d.querySelector("[data-rail-skirt]").value,
+      color: d.querySelector("[data-rail-color]").value
+    };
+  }).filter(r => (r.levelLengthFt + r.stairLengthFt) > 0 && r.material && r.collection);
 
   return {
     P: parseFloat($("dkP").value) || 0,
@@ -6234,6 +6876,54 @@ function fmtMoney(n) {
   return "$" + n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
+// Strip "Run N - " / "Run N Level - " / "Run N Stair - " prefix so identical SKUs
+// from different runs can share one display row.
+function _stripRunPrefix(desc) {
+  return (desc || "").replace(/^\s*Run\s+\d+(?:\s+(?:Level|Stair))?\s*[-–]\s*/i, "");
+}
+
+// Collapse same-SKU lines into one aggregated line. Pure data — caller decorates the
+// description for HTML or CSV separately. The contributing-run list is exposed as
+// `runs` (sorted ascending) so callers can format as they like.
+function aggregateBOMBySKU(lines) {
+  const byKey = new Map();
+  lines.forEach(line => {
+    const key = line.sku && line.sku !== "-" ? line.sku : `__nosku__:${_stripRunPrefix(line.description)}`;
+    const runMatch = (line.description || "").match(/^\s*Run\s+(\d+)/i);
+    const runNum = runMatch ? parseInt(runMatch[1]) : null;
+    if (!byKey.has(key)) {
+      byKey.set(key, {
+        ...line,
+        description: _stripRunPrefix(line.description) || line.description,
+        qty_raw: line.qty_raw || 0,
+        qty: line.qty || 0,
+        total_price: line.total_price != null ? line.total_price : null,
+        _runs: new Set(runNum != null ? [runNum] : []),
+        _notes: new Set(line.notes ? [line.notes] : [])
+      });
+    } else {
+      const a = byKey.get(key);
+      a.qty_raw += (line.qty_raw || 0);
+      a.qty += (line.qty || 0);
+      if (line.total_price != null) a.total_price = (a.total_price || 0) + line.total_price;
+      if (runNum != null) a._runs.add(runNum);
+      if (line.notes) a._notes.add(line.notes);
+    }
+  });
+  return [...byKey.values()].map(l => ({
+    ...l,
+    runs: [...l._runs].sort((a, b) => a - b),
+    notes: [...l._notes].join(" • ")
+  }));
+}
+
+// HTML chip showing which runs contributed to an aggregated line
+function _runChip(runs) {
+  if (!runs || runs.length === 0) return "";
+  if (runs.length === 1) return ` <span class="agg-runs">(run ${runs[0]})</span>`;
+  return ` <span class="agg-runs">(runs ${runs.join(", ")})</span>`;
+}
+
 function renderBOM(bom, grandTotal) {
   const groups = {};
   bom.forEach(line => {
@@ -6251,16 +6941,18 @@ function renderBOM(bom, grandTotal) {
   let untracked = 0;
   groupOrder.forEach(g => {
     if (!groups[g]) return;
+    // Aggregate by SKU within each group so the same part across multiple runs shows once
+    const aggregated = aggregateBOMBySKU(groups[g]);
     let groupSubtotal = 0;
     let groupRows = "";
-    groups[g].forEach(l => {
+    aggregated.forEach(l => {
       const priceCell = l.total_price != null
         ? `<div class="price">${fmtMoney(l.total_price)}<span class="unit-price">${fmtMoney(l.unit_price)}/${l.unit.replace(/s$/, "")}</span></div>`
         : `<div class="price no-price">-<span class="unit-price">not priced</span></div>`;
       if (l.total_price != null) groupSubtotal += l.total_price;
       else if (l.qty > 0) untracked++;
       groupRows += `<div class="bom-line">
-        <div class="desc">${l.description}<span class="sku">${l.sku}</span></div>
+        <div class="desc">${l.description}${_runChip(l.runs)}<span class="sku">${l.sku}</span></div>
         <div class="qty">${l.qty} ${l.unit}<span class="raw">raw ${l.qty_raw.toFixed(1)}</span></div>
         ${priceCell}
       </div>`;
@@ -6463,8 +7155,11 @@ function duplicateRailRun(sourceDivId) {
   addRailRun();
   const allCards = document.querySelectorAll("#railList .card");
   const newCard = allCards[allCards.length - 1];
-  // Apply values in cascade order (material first, then collection, then dependents)
-  ["data-rail-length","data-rail-stair","data-rail-material","data-rail-collection",
+  // Apply values in cascade order (material first → dependents).
+  // Stair toggle must fire BEFORE stair-length / ADA so the fields are visible.
+  ["data-rail-level-length","data-rail-stair","data-rail-stair-length","data-rail-ada",
+   "data-rail-corners-90","data-rail-corners-45","data-rail-wall-ends",
+   "data-rail-material","data-rail-collection",
    "data-rail-height","data-rail-section","data-rail-toprail","data-rail-infill",
    "data-rail-sleeve","data-rail-color","data-rail-cap","data-rail-skirt"].forEach(name => {
     if (values[name]) {
@@ -6493,10 +7188,32 @@ function addRailRun() {
       </div>
     </div>
     <div class="row r2">
-      <div class="field"><label>Run Length (LF)</label>
-        <input type="number" min="1" step="1" placeholder="e.g. 30" data-rail-length inputmode="numeric"></div>
+      <div class="field"><label>Level Length (LF)</label>
+        <input type="number" min="0" step="1" placeholder="e.g. 20" data-rail-level-length inputmode="numeric"></div>
       <div class="field"><label>Has Stair Section?</label>
-        <select data-rail-stair><option value="no">No (level only)</option><option value="yes">Yes (stair section)</option></select></div>
+        <select data-rail-stair><option value="no">No (level only)</option><option value="yes">Yes (includes stair)</option></select></div>
+    </div>
+    <div class="row r2" data-stair-fields style="display:none">
+      <div class="field"><label>Stair Length <em>(rake LF)</em></label>
+        <input type="number" min="0" step="1" placeholder="e.g. 12" data-rail-stair-length inputmode="numeric"></div>
+      <div class="field"><label>ADA Handrail</label>
+        <select data-rail-ada>
+          <option value="">None</option>
+          <option value="composite">Composite ADA Handrail</option>
+          <option value="aluminum">Aluminum ADA Handrail</option>
+        </select></div>
+    </div>
+    <div class="row r3">
+      <div class="field"><label>90&deg; Corners</label>
+        <input type="number" min="0" step="1" value="0" data-rail-corners-90 inputmode="numeric"></div>
+      <div class="field"><label>45&deg; Corners</label>
+        <input type="number" min="0" step="1" value="0" data-rail-corners-45 inputmode="numeric"></div>
+      <div class="field"><label>Wall Terminations</label>
+        <select data-rail-wall-ends>
+          <option value="0">0 (free ends)</option>
+          <option value="1">1 (one wall end)</option>
+          <option value="2">2 (both wall ends)</option>
+        </select></div>
     </div>
     <div class="row r2">
       <div class="field"><label>Material</label>
@@ -6556,6 +7273,20 @@ function wireRailRunCascade(runDiv) {
   const mat = runDiv.querySelector("[data-rail-material]").value;
   const coll = runDiv.querySelector("[data-rail-collection]").value;
   const sleeve = runDiv.querySelector("[data-rail-sleeve]").value;
+
+  // Show/hide stair-portion fields based on the hasStair toggle
+  const stairToggle = runDiv.querySelector("[data-rail-stair]");
+  const stairFields = runDiv.querySelector("[data-stair-fields]");
+  if (stairToggle && stairFields) {
+    stairFields.style.display = stairToggle.value === "yes" ? "" : "none";
+    // When toggling off, clear stair length and ADA so they don't ghost-contribute to BOM
+    if (stairToggle.value !== "yes") {
+      const stairLen = runDiv.querySelector("[data-rail-stair-length]");
+      const ada = runDiv.querySelector("[data-rail-ada]");
+      if (stairLen) stairLen.value = "";
+      if (ada) ada.value = "";
+    }
+  }
 
   const collEl = runDiv.querySelector("[data-rail-collection]");
   const topEl = runDiv.querySelector("[data-rail-toprail]");
@@ -6684,7 +7415,15 @@ function buildCSV(bom, input) {
 
   const rows = [headers.join(",")];
 
-  bom.forEach(line => {
+  // Aggregate same-SKU rows within each category so the CSV mirrors the on-screen BOM
+  const byCategory = {};
+  bom.forEach(l => { (byCategory[l.category] ||= []).push(l); });
+  const aggregatedBom = [];
+  Object.entries(byCategory).forEach(([cat, lines]) => {
+    aggregateBOMBySKU(lines).forEach(l => aggregatedBom.push(l));
+  });
+
+  aggregatedBom.forEach(line => {
     // Skip BOM-only lines that don't belong in a customer catalog export
     if (line.qty == null || line.qty <= 0) return;
     if (line.category === "tax") return;   // tax is computed by the receiving software
