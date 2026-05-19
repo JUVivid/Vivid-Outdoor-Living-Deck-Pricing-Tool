@@ -4808,218 +4808,463 @@ function _deckingSKU(profile, lengthFt, color, fallback) {
 // SECTION 6 — STAIRS / DRINK RAIL
 // ═══════════════════════════════════════════════════════════════════════════
 
+// Stair calc — split into "segments" so we can grow into L/U shapes and landings.
+// Phase 1: every stair expands to [flight, bottom_pad] producing the same BOM as before.
+// Phase 2+: stair.shape ('linear'/'L'/'U'/etc) drives a richer segment list.
+
+// Vivid house policy: never wider than 12" OC on stair stringers (high-wear surface).
+// Where mfr requires tighter (composite Premier 9", Legacy/Reserve/Prime/Prime+/
+// Premier+ 10"), the tighter spec wins.
+function _stairStringerSpacingIn(collectionKey, seriesKey, profileId) {
+  const VIVID_HOUSE_MAX = 12;
+  let mfrSpec = VIVID_HOUSE_MAX;
+  if (seriesKey === "composite") {
+    switch (collectionKey) {
+      case "premier":        mfrSpec = 9;  break;
+      case "legacy":
+      case "reserve":
+      case "prime":
+      case "prime_plus":
+      case "premier_plus":   mfrSpec = 10; break;
+      case "terrain":
+      case "terrain_plus":   mfrSpec = 16; break; // veneer-only per mfr; capped by house policy
+    }
+  }
+  return Math.min(mfrSpec, VIVID_HOUSE_MAX);
+}
+
+// Build the internal segment list for a stair based on its declared shape.
+//
+// Shapes supported:
+//   linear — one flight + bottom landing
+//   L      — top flight + 90° mid-landing + bottom flight + bottom landing
+//   U      — top flight + 180° mid-landing + bottom flight + bottom landing
+//
+// Optional pieces (all shapes):
+//   topPlatform        — pause platform between deck and first riser
+//   bottomPlatform     — "concrete" (default pad) or "wood" (mini-deck framing)
+//   midLanding (auto)  — IRC R311.7.3 requires a landing every 12' of rise; if the
+//                        stair is linear but H_in > 144, we still emit a flight but
+//                        validation surfaces the issue. (User must explicitly pick L/U.)
+function _buildStairSegments(stair, H_in) {
+  const shape = stair.shape || "linear";
+  const segments = [];
+
+  // Optional top platform (transition pause at deck level)
+  if (stair.topPlatform) {
+    segments.push({
+      type: "platform",
+      kind: "top",
+      surface: "wood",
+      width_ft: stair.width,
+      depth_ft: +stair.topPlatformDepth || 3,
+      height_in: H_in
+    });
+  }
+
+  if (shape === "L" || shape === "U") {
+    // Split the total rise at the mid-landing. Landing height defaults to half the rise.
+    const landingHeightIn = Math.max(7.75, Math.min(H_in - 7.75, +stair.landingHeight || (H_in / 2)));
+    const topFlightH = H_in - landingHeightIn;
+    const bottomFlightH = landingHeightIn;
+    const landingDepthFt = +stair.landingDepth || stair.width;
+    // U-shape requires the landing to span both flights side-by-side; add ~4" gap.
+    const landingWidthFt = (shape === "U") ? (stair.width * 2 + 0.3) : stair.width;
+
+    segments.push({
+      type: "flight",
+      width_ft: stair.width,
+      height_in: topFlightH,
+      role: "top"
+    });
+    segments.push({
+      type: "landing",
+      width_ft: landingWidthFt,
+      depth_ft: landingDepthFt,
+      height_in: landingHeightIn,
+      shape,                                       // "L" or "U" — affects railing routing
+      turn: shape === "L" ? (stair.landingTurn || "right") : "180"
+    });
+    segments.push({
+      type: "flight",
+      width_ft: stair.width,
+      height_in: bottomFlightH,
+      role: "bottom"
+    });
+  } else {
+    // Linear single flight
+    segments.push({ type: "flight", width_ft: stair.width, height_in: H_in });
+  }
+
+  // Bottom landing — concrete pad (default) or wood platform
+  if (stair.bottomPlatform === "wood") {
+    segments.push({
+      type: "platform",
+      kind: "bottom",
+      surface: "wood",
+      width_ft: +stair.bottomPlatformWidth || stair.width,
+      depth_ft: +stair.bottomPlatformDepth || stair.width
+    });
+  } else {
+    segments.push({ type: "platform", kind: "bottom", surface: "concrete" });
+  }
+
+  return segments;
+}
+
+// Emit BOM for a single "flight" segment (stringers, treads, risers, skirts, 2x4 PT
+// tread support if PVC, intermediate beams if run > 6 ft). Returns { bom, summary }.
+function _countFlight(flight, idx, ctx) {
+  const { treadProfile, riserProfile, fasciaProfile, mainColor, riserColor, fasciaColor,
+          seriesKey, stringerSpacing } = ctx;
+  const widthFt = flight.width_ft;
+  const widthIn = ftToIn(widthFt);
+  const H_in = flight.height_in;
+
+  // Geometry
+  const risers = Math.ceil(H_in / IRC_STAIR.max_riser_in);
+  const treads = risers - 1;
+  const total_rise_in = risers * IRC_STAIR.max_riser_in;
+  const total_run_in = treads * IRC_STAIR.min_tread_in;
+  const excavation_below_grade_in = total_rise_in - H_in;
+  const stringerLengthIn = Math.sqrt(total_rise_in ** 2 + total_run_in ** 2);
+  const stringerLengthFt = nextStandardLength(stringerLengthIn / 12);
+  const landingRequired = (total_rise_in / 12) > IRC_STAIR.max_landing_h_ft;
+  // Stringer count = max(2, ceil(width/spacing) + 1)
+  const stringerCount = Math.max(2, Math.ceil(widthIn / stringerSpacing) + 1);
+
+  const bom = [];
+  const summary = {
+    idx, width: widthFt, risers, treads,
+    excavation_below_grade_in, stringerLengthFt, stringerCount, landingRequired,
+    stringerSpacing
+  };
+
+  // Stringers
+  bom.push(makeBOMLine({
+    category: "framing",
+    description: `Stair ${idx+1} - 2x12 PT stringer (${stringerLengthFt}', spacing <=${stringerSpacing}" per ${seriesKey})`,
+    sku: `2x12-${stringerLengthFt}-PT`,
+    qty_raw: stringerCount,
+    unit: "pcs",
+    unit_lf: stringerLengthFt
+  }));
+
+  // Treads — SQUARE-edge profile, face-fastened with Cortex/TOPLoc
+  const rowsPerStep = Math.ceil(IRC_STAIR.min_tread_in / treadProfile.actual_w_in);
+  const totalTreadRows = treads * rowsPerStep;
+  const treadCombo = bestCombo(widthFt, treadProfile.lengths_ft);
+  if (treadCombo) {
+    const treadsPerBoard = Math.floor(treadCombo.boardLen / widthFt);
+    const treadBoardCount = Math.ceil(totalTreadRows / treadsPerBoard);
+    bom.push(makeBOMLine({
+      category: "stair",
+      description: `Stair ${idx+1} - Tread boards (${treadProfile.collection?.label || "Main"}, ${treadCombo.boardLen}', square-edge for face-fastening)`,
+      sku: _deckingSKU(treadProfile, treadCombo.boardLen, mainColor, "STAIR-TREAD"),
+      qty_raw: treadBoardCount,
+      unit: "pcs",
+      unit_lf: treadCombo.boardLen
+    }));
+  }
+
+  // PVC: 2x4 PT centered under each tread row (install guide pg 23)
+  if (seriesKey === "pvc") {
+    const tread2x4LenFt = nextStandardLength(widthFt + 0.5);
+    bom.push(makeBOMLine({
+      category: "framing",
+      description: `Stair ${idx+1} - 2x4 PT tread support (${tread2x4LenFt}', centered under each tread per PVC install guide)`,
+      sku: `2x4-${tread2x4LenFt}-PT`,
+      qty_raw: treads,
+      unit: "pcs",
+      unit_lf: tread2x4LenFt,
+      notes: "Pneumatic framing nailer with 3-1/4\" x .131 nails per install guide pg 23"
+    }));
+  }
+
+  // Risers
+  const riserCombo = bestCombo(widthFt, riserProfile.lengths_ft);
+  if (riserCombo) {
+    const risersPerBoard = Math.floor(riserCombo.boardLen / widthFt);
+    const riserBoardCount = Math.ceil(risers / risersPerBoard);
+    bom.push(makeBOMLine({
+      category: "stair",
+      description: `Stair ${idx+1} - Riser boards (${riserProfile.collection?.label || "Riser"}, ${riserCombo.boardLen}')`,
+      sku: _deckingSKU(riserProfile, riserCombo.boardLen, riserColor, "STAIR-RISER"),
+      qty_raw: riserBoardCount,
+      unit: "pcs",
+      unit_lf: riserCombo.boardLen
+    }));
+  }
+
+  // Skirts — fascia on outer stringers, 2 sides
+  const skirtCombo = bestCombo(stringerLengthFt, fasciaProfile.lengths_ft);
+  if (skirtCombo) {
+    bom.push(makeBOMLine({
+      category: "stair",
+      description: `Stair ${idx+1} - Stringer skirt fascia (${fasciaProfile.collection?.label || "Fascia"})`,
+      sku: _deckingSKU(fasciaProfile, skirtCombo.boardLen, fasciaColor, "STAIR-SKIRT"),
+      qty_raw: 2,
+      unit: "pcs",
+      unit_lf: skirtCombo.boardLen
+    }));
+  }
+
+  // Intermediate stringer support beam(s) for run > 6 ft (DCA 6 + industry practice)
+  const total_run_ft = total_run_in / 12;
+  const intermediateSupports = total_run_ft > 6 ? Math.ceil(total_run_ft / 6) - 1 : 0;
+  if (intermediateSupports > 0) {
+    summary.intermediateSupports = intermediateSupports;
+    const beamLengthFt = nextStandardLength(widthFt + 1);
+    bom.push(makeBOMLine({
+      category: "framing",
+      description: `Stair ${idx+1} - 2x10 PT support beam (doubled, ${beamLengthFt}') x ${intermediateSupports} support point(s)`,
+      sku: `2x10-${beamLengthFt}-PT`,
+      qty_raw: intermediateSupports * 2,
+      unit: "pcs",
+      unit_lf: beamLengthFt
+    }));
+    bom.push(makeBOMLine({
+      category: "framing",
+      description: `Stair ${idx+1} - 4x4 PT support post (cut to fit) x ${intermediateSupports} support point(s)`,
+      sku: "4x4-8-PT",
+      qty_raw: intermediateSupports * 2,
+      unit: "pcs",
+      unit_lf: 8
+    }));
+    bom.push(makeBOMLine({
+      category: "hardware",
+      description: `Stair ${idx+1} - ABA44Z post base for 4x4 support posts`,
+      sku: "ABA44Z",
+      qty_raw: intermediateSupports * 2,
+      unit: "pcs"
+    }));
+    bom.push(makeBOMLine({
+      category: "hardware",
+      description: `Stair ${idx+1} - 1/2" anchor bolt for support post bases`,
+      sku: "ANCHOR-0.5",
+      qty_raw: intermediateSupports * 2,
+      unit: "pcs"
+    }));
+    bom.push(makeBOMLine({
+      category: "hardware",
+      description: `Stair ${idx+1} - BC4Z beam-to-post connector for support beam`,
+      sku: "BC4Z",
+      qty_raw: intermediateSupports * 2,
+      unit: "pcs"
+    }));
+    bom.push(makeBOMLine({
+      category: "concrete",
+      description: `Stair ${idx+1} - Support post footing concrete (${FOOTING_DIM_IN.w}"x${FOOTING_DIM_IN.l}"x${FOOTING_DIM_IN.depth}", ${CONCRETE_BAGS_PER_FOOTING} bags ea)`,
+      sku: "CONCRETE-60LB",
+      qty_raw: intermediateSupports * 2 * CONCRETE_BAGS_PER_FOOTING,
+      unit: "bags"
+    }));
+  }
+
+  return { bom, summary };
+}
+
+// Emit BOM for a "platform" segment.
+//   concrete bottom pad  — 2 bags 60 lb concrete (today's default)
+//   wood bottom platform — mini-deck framing (joists/beam/posts/decking/fascia/footings)
+//   wood top platform    — same framing but joists may attach to deck ledger (1-2 posts)
+function _countPlatform(platform, idx, ctx) {
+  if (platform.kind === "bottom" && platform.surface === "concrete") {
+    return {
+      bom: [makeBOMLine({
+        category: "concrete",
+        description: `Stair ${idx+1} - Landing pad (60 lb concrete)`,
+        sku: "CONCRETE-60LB",
+        qty_raw: 2,
+        unit: "bags"
+      })]
+    };
+  }
+  if (platform.surface === "wood") {
+    // Wood platform = framed mini-deck on posts.
+    // Top platform sits at deck height (no extra posts to grade, attaches to deck ledger
+    // or shares the deck's framing). Bottom platform stands free with 4 posts to grade.
+    const isTop = platform.kind === "top";
+    const label = isTop ? "Top platform" : "Bottom platform";
+    return _countLanding({
+      ...platform,
+      _label: label,
+      _postsCount: isTop ? 2 : 4,   // top platform shares 2 posts with deck ledger
+      _heightForPosts: isTop ? 0 : (platform.height_in || 12)  // bottom is at grade-ish
+    }, idx, ctx);
+  }
+  return { bom: [] };
+}
+
+// Mini-deck framing for landings and wood platforms.
+// Emits: corner posts + footings + post bases + beam + joists + rim + decking + fascia.
+function _countLanding(landing, idx, ctx) {
+  const bom = [];
+  const widthFt = +landing.width_ft || 4;
+  const depthFt = +landing.depth_ft || 4;
+  const sqFt = widthFt * depthFt;
+  const perimeterLF = 2 * (widthFt + depthFt);
+  const heightIn = landing.height_in || 36;
+  const label = landing._label || `${landing.shape || ""} landing`.trim();
+  const postsCount = landing._postsCount != null ? landing._postsCount : 4;
+
+  // 4x4 PT posts (or 2 for top platform that shares ledger w/ deck). Length = next standard
+  // length above the landing height (in feet). Default 4' for low landings, 8' for taller.
+  if (postsCount > 0 && heightIn > 0) {
+    const postLenFt = heightIn > 48 ? 8 : 4;
+    bom.push(makeBOMLine({
+      category: "framing",
+      description: `Stair ${idx+1} - ${label} 4x4 PT post (${postLenFt}', ${heightIn}" high)`,
+      sku: `4x4-${postLenFt}-PT`,
+      qty_raw: postsCount,
+      unit: "pcs",
+      unit_lf: postLenFt
+    }));
+    // Footings — 1 per post
+    bom.push(makeBOMLine({
+      category: "concrete",
+      description: `Stair ${idx+1} - ${label} footings (${FOOTING_DIM_IN.w}"x${FOOTING_DIM_IN.l}"x${FOOTING_DIM_IN.depth}", ${CONCRETE_BAGS_PER_FOOTING} bags ea)`,
+      sku: "CONCRETE-60LB",
+      qty_raw: postsCount * CONCRETE_BAGS_PER_FOOTING,
+      unit: "bags"
+    }));
+    bom.push(makeBOMLine({
+      category: "hardware",
+      description: `Stair ${idx+1} - ${label} ABA44Z post bases`,
+      sku: "ABA44Z",
+      qty_raw: postsCount,
+      unit: "pcs"
+    }));
+  }
+
+  // Beam — doubled 2x10 PT, length = landing width + 1ft overhang each side
+  const beamLenFt = nextStandardLength(widthFt + 1);
+  bom.push(makeBOMLine({
+    category: "framing",
+    description: `Stair ${idx+1} - ${label} beam (doubled 2x10 PT, ${beamLenFt}')`,
+    sku: `2x10-${beamLenFt}-PT`,
+    qty_raw: 2,    // doubled
+    unit: "pcs",
+    unit_lf: beamLenFt
+  }));
+
+  // Joists — 2x8 PT at 16" OC, length = landing depth. Min 2 joists (rim joists).
+  const joistLenFt = nextStandardLength(depthFt + 0.5);
+  const joistCount = Math.max(2, Math.ceil(widthFt * 12 / 16) + 1);
+  bom.push(makeBOMLine({
+    category: "framing",
+    description: `Stair ${idx+1} - ${label} joist (2x8 PT, ${joistLenFt}', 16" OC, ${joistCount} pcs)`,
+    sku: `2x8-${joistLenFt}-PT`,
+    qty_raw: joistCount,
+    unit: "pcs",
+    unit_lf: joistLenFt
+  }));
+
+  // Rim joists on width sides (2 pcs)
+  const rimLenFt = nextStandardLength(widthFt + 0.5);
+  bom.push(makeBOMLine({
+    category: "framing",
+    description: `Stair ${idx+1} - ${label} rim joist (2x8 PT, ${rimLenFt}')`,
+    sku: `2x8-${rimLenFt}-PT`,
+    qty_raw: 2,
+    unit: "pcs",
+    unit_lf: rimLenFt
+  }));
+
+  // Decking on top — uses tread profile (square-edge, face-fastened). Board count = sqFt / coverage.
+  const tp = ctx.treadProfile;
+  if (tp && tp.lengths_ft && tp.lengths_ft.length) {
+    const boardLen = bestCombo(widthFt, tp.lengths_ft)?.boardLen || tp.lengths_ft[0];
+    const boardCoverage = (tp.actual_w_in / 12) * boardLen;   // sqft per board
+    const deckBoards = Math.ceil(sqFt / boardCoverage * 1.05); // 5% waste
+    bom.push(makeBOMLine({
+      category: "stair",
+      description: `Stair ${idx+1} - ${label} decking (${tp.collection?.label || "Main"}, ${boardLen}', ${sqFt.toFixed(1)} sqft)`,
+      sku: _deckingSKU(tp, boardLen, ctx.mainColor, "LANDING-DECKING"),
+      qty_raw: deckBoards,
+      unit: "pcs",
+      unit_lf: boardLen
+    }));
+  }
+
+  // Fascia perimeter
+  const fp = ctx.fasciaProfile;
+  if (fp && fp.lengths_ft) {
+    const fasciaLen = fp.lengths_ft[0] || 12;
+    const fasciaBoards = Math.ceil(perimeterLF / fasciaLen);
+    bom.push(makeBOMLine({
+      category: "stair",
+      description: `Stair ${idx+1} - ${label} fascia perimeter (${fp.collection?.label || "Fascia"}, ${perimeterLF.toFixed(0)} LF)`,
+      sku: _deckingSKU(fp, fasciaLen, ctx.fasciaColor, "LANDING-FASCIA"),
+      qty_raw: fasciaBoards,
+      unit: "pcs",
+      unit_lf: fasciaLen
+    }));
+  }
+
+  return { bom };
+}
+
 function countStairs({ stairs = [], H_in, mainProfile, stairProfile, riserProfile, fasciaProfile, mainColor, riserColor, fasciaColor, collectionKey, seriesKey }) {
-  // Defensive: never crash on null profile resolution
+  // Defensive profile fallbacks
   if (!mainProfile) {
     mainProfile = { actual_w_in: 5.5, thick_in: 1.0, lengths_ft: [12, 16, 20], id: "sq_1x6", collection: { label: "Decking" } };
   }
-  // stairProfile = the SQUARE-edge profile used for face-fastened treads. Falls back
-  // to mainProfile if stair resolution returned null (legacy / catalog gap).
   const treadProfile = stairProfile || mainProfile;
-  // riserProfile / fasciaProfile may be null if the resolver didn't find a match
-  // (e.g., a collection that doesn't expose a riser SKU). Fall back to a 12' default
-  // so the calc keeps producing a plausible BOM line the installer can correct.
   if (!riserProfile)  riserProfile  = { actual_w_in: 7.25,  thick_in: 0.75, lengths_ft: [12], id: "riser",  collection: { label: "Riser" } };
   if (!fasciaProfile) fasciaProfile = { actual_w_in: 11.75, thick_in: 0.50, lengths_ft: [12], id: "fascia", collection: { label: "Fascia" } };
+
+  const stringerSpacing = _stairStringerSpacingIn(collectionKey, seriesKey, treadProfile.id);
+  const ctx = {
+    treadProfile, riserProfile, fasciaProfile,
+    mainColor, riserColor, fasciaColor,
+    collectionKey, seriesKey, stringerSpacing
+  };
+
   const allBom = [];
   const stairResults = [];
 
-  // Per-material max stringer spacing.
-  // Vivid house policy: NEVER wider than 12" OC on stairs — stairs see high-traffic wear
-  // and we want the extra stability margin regardless of what the manufacturer allows.
-  // If manufacturer requires tighter (e.g., composite Premier @ 9", Legacy @ 10"),
-  // we use the tighter spec.
-  function maxStringerSpacingIn(collectionKey, seriesKey, profileId) {
-    const VIVID_HOUSE_MAX = 12;
-    let mfrSpec = VIVID_HOUSE_MAX;
-    if (seriesKey === "composite") {
-      // Composite install guide pg 8:
-      switch (collectionKey) {
-        case "premier":        mfrSpec = 9;  break;
-        case "legacy":
-        case "reserve":
-        case "prime":
-        case "prime_plus":
-        case "premier_plus":   mfrSpec = 10; break;
-        case "terrain":
-        case "terrain_plus":   mfrSpec = 16; break; // veneer-only per mfr; capped by house policy
-      }
-    }
-    // PVC: mfr allows up to 16" with MAX boards but house policy caps at 12.
-    return Math.min(mfrSpec, VIVID_HOUSE_MAX);
-  }
-  const stringerSpacing = maxStringerSpacingIn(collectionKey, seriesKey, treadProfile.id);
-
   stairs.forEach((stair, idx) => {
-    const widthFt = stair.width;
-    const widthIn = ftToIn(widthFt);
-
-    // Geometry
-    const risers = Math.ceil(H_in / IRC_STAIR.max_riser_in);
-    const treads = risers - 1;
-    const total_rise_in = risers * IRC_STAIR.max_riser_in;
-    const total_run_in = treads * IRC_STAIR.min_tread_in;
-    const excavation_below_grade_in = total_rise_in - H_in;
-    const stringerLengthIn = Math.sqrt(total_rise_in ** 2 + total_run_in ** 2);
-    const stringerLengthFt = nextStandardLength(stringerLengthIn / 12);
-    const landingRequired = (total_rise_in / 12) > IRC_STAIR.max_landing_h_ft;
-
-    // Stringer count by stair width AND tread material's max spacing.
-    // Formula: at least 2 (one per outer edge); add interior stringers so no span
-    // exceeds the material's max. spans = ceil(width / maxSpacing), stringers = spans + 1.
-    const stringerCount = Math.max(2, Math.ceil(widthIn / stringerSpacing) + 1);
-
-    stairResults.push({
-      idx, width: widthFt, risers, treads,
-      excavation_below_grade_in, stringerLengthFt, stringerCount, landingRequired,
-      stringerSpacing
+    const segments = _buildStairSegments(stair, H_in);
+    segments.forEach(seg => {
+      let r;
+      if (seg.type === "flight")        r = _countFlight(seg, idx, ctx);
+      else if (seg.type === "landing")  r = _countLanding(seg, idx, ctx);
+      else if (seg.type === "platform") r = _countPlatform(seg, idx, ctx);
+      else return;
+      if (r.bom)     allBom.push(...r.bom);
+      if (r.summary) stairResults.push(r.summary);
     });
-
-    // Stringers (PT 2×12)
-    allBom.push(makeBOMLine({
-      category: "framing",
-      description: `Stair ${idx+1} - 2x12 PT stringer (${stringerLengthFt}', spacing <=${stringerSpacing}" per ${seriesKey})`,
-      sku: `2x12-${stringerLengthFt}-PT`,
-      qty_raw: stringerCount,
-      unit: "pcs",
-      unit_lf: stringerLengthFt
-    }));
-
-    // Treads — use SQUARE-edge profile (treadProfile), not the grooved field profile.
-    // Square-edge boards are face-fastened to stringers with Cortex/TOPLoc per install guide.
-    const rowsPerStep = Math.ceil(IRC_STAIR.min_tread_in / treadProfile.actual_w_in);
-    const totalTreadRows = treads * rowsPerStep;
-    const treadCombo = bestCombo(widthFt, treadProfile.lengths_ft);
-    if (treadCombo) {
-      const treadsPerBoard = Math.floor(treadCombo.boardLen / widthFt);
-      const treadBoardCount = Math.ceil(totalTreadRows / treadsPerBoard);
-      allBom.push(makeBOMLine({
-        category: "stair",
-        description: `Stair ${idx+1} - Tread boards (${treadProfile.collection?.label || "Main"}, ${treadCombo.boardLen}', square-edge for face-fastening)`,
-        sku: _deckingSKU(treadProfile, treadCombo.boardLen, mainColor, "STAIR-TREAD"),
-        qty_raw: treadBoardCount,
-        unit: "pcs",
-        unit_lf: treadCombo.boardLen
-      }));
-    }
-
-    // PVC stair install guide pg 23: 2x4 PT centered under each tread row for support.
-    // Composite install guide doesn't require this (its tighter stringer spacing handles it).
-    if (seriesKey === "pvc") {
-      const tread2x4LenFt = nextStandardLength(widthFt + 0.5);  // a bit longer than stair width for cutting
-      allBom.push(makeBOMLine({
-        category: "framing",
-        description: `Stair ${idx+1} - 2x4 PT tread support (${tread2x4LenFt}', centered under each tread per PVC install guide)`,
-        sku: `2x4-${tread2x4LenFt}-PT`,
-        qty_raw: treads,
-        unit: "pcs",
-        unit_lf: tread2x4LenFt,
-        notes: "Pneumatic framing nailer with 3-1/4\" x .131 nails per install guide pg 23"
-      }));
-    }
-
-    // Risers
-    const riserCombo = bestCombo(widthFt, riserProfile.lengths_ft);
-    if (riserCombo) {
-      const risersPerBoard = Math.floor(riserCombo.boardLen / widthFt);
-      const riserBoardCount = Math.ceil(risers / risersPerBoard);
-      allBom.push(makeBOMLine({
-        category: "stair",
-        description: `Stair ${idx+1} - Riser boards (${riserProfile.collection?.label || "Riser"}, ${riserCombo.boardLen}')`,
-        sku: _deckingSKU(riserProfile, riserCombo.boardLen, riserColor, "STAIR-RISER"),
-        qty_raw: riserBoardCount,
-        unit: "pcs",
-        unit_lf: riserCombo.boardLen
-      }));
-    }
-
-    // Skirts (fascia on outer stringers, 2 sides)
-    const skirtCombo = bestCombo(stringerLengthFt, fasciaProfile.lengths_ft);
-    if (skirtCombo) {
-      allBom.push(makeBOMLine({
-        category: "stair",
-        description: `Stair ${idx+1} - Stringer skirt fascia (${fasciaProfile.collection?.label || "Fascia"})`,
-        sku: _deckingSKU(fasciaProfile, skirtCombo.boardLen, fasciaColor, "STAIR-SKIRT"),
-        qty_raw: 2,
-        unit: "pcs",
-        unit_lf: skirtCombo.boardLen
-      }));
-    }
-
-    // Stair landing concrete
-    allBom.push(makeBOMLine({
-      category: "concrete",
-      description: `Stair ${idx+1} - Landing pad (60 lb concrete)`,
-      sku: "CONCRETE-60LB",
-      qty_raw: 2,
-      unit: "bags"
-    }));
-
-    // ── Intermediate stringer support beam(s) for stairs with run > 6 ft ──
-    // Per industry practice & DCA 6: a PT 2x12 stringer reliably spans ~6 ft.
-    // For total horizontal run > 6 ft, add intermediate support (beam + 2 posts)
-    // every ~6 ft of run.
-    const total_run_ft = total_run_in / 12;
-    const intermediateSupports = total_run_ft > 6 ? Math.ceil(total_run_ft / 6) - 1 : 0;
-    if (intermediateSupports > 0) {
-      stairResults[stairResults.length - 1].intermediateSupports = intermediateSupports;
-
-      // Support beam: doubled 2x10 PT, length = stair width (+ 6" each side overhang)
-      const beamLengthFt = nextStandardLength(widthFt + 1);
-      allBom.push(makeBOMLine({
-        category: "framing",
-        description: `Stair ${idx+1} - 2x10 PT support beam (doubled, ${beamLengthFt}') x ${intermediateSupports} support point(s)`,
-        sku: `2x10-${beamLengthFt}-PT`,
-        qty_raw: intermediateSupports * 2,    // doubled beam = 2 plies per support
-        unit: "pcs",
-        unit_lf: beamLengthFt
-      }));
-
-      // Posts (4x4 PT, 2 per support, length variable per site — buy 8' to cut)
-      allBom.push(makeBOMLine({
-        category: "framing",
-        description: `Stair ${idx+1} - 4x4 PT support post (cut to fit) x ${intermediateSupports} support point(s)`,
-        sku: "4x4-8-PT",
-        qty_raw: intermediateSupports * 2,
-        unit: "pcs",
-        unit_lf: 8
-      }));
-
-      // Post bases (ABA44Z) and beam-to-post connectors (BC4Z or BCS2-3/4Z)
-      allBom.push(makeBOMLine({
-        category: "hardware",
-        description: `Stair ${idx+1} - ABA44Z post base for 4x4 support posts`,
-        sku: "ABA44Z",
-        qty_raw: intermediateSupports * 2,
-        unit: "pcs"
-      }));
-      allBom.push(makeBOMLine({
-        category: "hardware",
-        description: `Stair ${idx+1} - 1/2" anchor bolt for support post bases`,
-        sku: "ANCHOR-0.5",
-        qty_raw: intermediateSupports * 2,
-        unit: "pcs"
-      }));
-      allBom.push(makeBOMLine({
-        category: "hardware",
-        description: `Stair ${idx+1} - BC4Z beam-to-post connector for support beam`,
-        sku: "BC4Z",
-        qty_raw: intermediateSupports * 2,
-        unit: "pcs"
-      }));
-
-      // Footings (16x16x24, 8 bags each)
-      allBom.push(makeBOMLine({
-        category: "concrete",
-        description: `Stair ${idx+1} - Support post footing concrete (${FOOTING_DIM_IN.w}\"x${FOOTING_DIM_IN.l}\"x${FOOTING_DIM_IN.depth}\", ${CONCRETE_BAGS_PER_FOOTING} bags ea)`,
-        sku: "CONCRETE-60LB",
-        qty_raw: intermediateSupports * 2 * CONCRETE_BAGS_PER_FOOTING,
-        unit: "bags"
-      }));
-    }
   });
 
   return { stairs: stairResults, bom: allBom };
+}
+
+// IRC R311.7.3 — landings required every 12' of rise. Other stair validations live here too.
+function validateStairs({ stairs = [], H_in }) {
+  const errors = [];
+  stairs.forEach((stair, idx) => {
+    const shape = stair.shape || "linear";
+    // R311.7.3 — total rise > 12' requires an intermediate landing
+    if (H_in > 144 && shape === "linear") {
+      errors.push(`Stair ${idx+1}: ${H_in}" rise exceeds 12' / 144" max between landings (IRC R311.7.3). Choose L-shape or U-shape and add a mid-landing.`);
+    }
+    // L/U landing height sanity — must be between 7.75" (one riser) and total - 7.75"
+    if ((shape === "L" || shape === "U") && stair.landingHeight != null) {
+      const lh = +stair.landingHeight;
+      if (lh < 7.75 || lh > H_in - 7.75) {
+        errors.push(`Stair ${idx+1}: Landing height ${lh}" must be between one riser (7.75") and one riser below the deck (${(H_in - 7.75).toFixed(1)}").`);
+      }
+    }
+    // R311.7.6 — landing depth must be >= stair width (square or larger)
+    if ((shape === "L" || shape === "U") && stair.landingDepth != null) {
+      const ld = +stair.landingDepth;
+      if (ld < stair.width) {
+        errors.push(`Stair ${idx+1}: Landing depth ${ld}' is less than stair width ${stair.width}' (IRC R311.7.6 requires landings be at least as deep as the stair is wide).`);
+      }
+    }
+  });
+  return errors;
 }
 
 function countDrinkRailBoard({ runs = [], drinkRailBoard }) {
@@ -6618,6 +6863,7 @@ if (typeof window !== "undefined") {
     getSkirtsForSleeve,
     intersectColors,
     validateRailing,
+    validateStairs,
     resolveRailingPanelSKU, resolveRailingTopRailSKU, resolveRailingPostSKU,
     resolveRailingCapSKU, resolveRailingSkirtSKU, resolveBalusterPackSKU, resolveRailingBracketSKU,
     findDeckingSKU,
@@ -6789,9 +7035,24 @@ window.addEventListener("DOMContentLoaded", () => {
 
 // recalc + addStair + addRailRun + render — populated in next tasks
 function readForm() {
-  const stairs = [...document.querySelectorAll("#stairList .card")].map(d => ({
-    width: parseFloat(d.querySelector("[data-stair-width]").value) || 0
-  })).filter(s => s.width > 0);
+  const stairs = [...document.querySelectorAll("#stairList .card")].map(d => {
+    const width = parseFloat(d.querySelector("[data-stair-width]").value) || 0;
+    const shape = d.querySelector("[data-stair-shape]")?.value || "linear";
+    const topPlatformOn = d.querySelector("[data-stair-top-platform]")?.value === "yes";
+    const bottomPlatform = d.querySelector("[data-stair-bottom-platform]")?.value || "concrete";
+    return {
+      width,
+      shape,
+      topPlatform: topPlatformOn,
+      topPlatformDepth: topPlatformOn ? (parseFloat(d.querySelector("[data-stair-top-depth]")?.value) || 3) : 0,
+      landingHeight: (shape === "L" || shape === "U") ? (parseFloat(d.querySelector("[data-stair-landing-height]")?.value) || 0) : 0,
+      landingDepth: (shape === "L" || shape === "U") ? (parseFloat(d.querySelector("[data-stair-landing-depth]")?.value) || 0) : 0,
+      landingTurn: shape === "L" ? (d.querySelector("[data-stair-landing-turn]")?.value || "right") : "",
+      bottomPlatform,
+      bottomPlatformWidth: bottomPlatform === "wood" ? (parseFloat(d.querySelector("[data-stair-bottom-width]")?.value) || 0) : 0,
+      bottomPlatformDepth: bottomPlatform === "wood" ? (parseFloat(d.querySelector("[data-stair-bottom-depth]")?.value) || 0) : 0
+    };
+  }).filter(s => s.width > 0);
 
   const railingRuns = [...document.querySelectorAll("#railList .card")].map(d => {
     const hasStair = d.querySelector("[data-rail-stair]").value === "yes";
@@ -7111,6 +7372,16 @@ function recalc() {
       });
       const badges = buildRailingBadges(errs);
       $("railValidation").innerHTML = badges.map(b => `<div class="badge ${b.level}">${b.text}</div>`).join("");
+
+      // Stair validation (IRC R311.7.3 etc.)
+      const stairErrs = (typeof validateStairs === "function")
+        ? validateStairs({ stairs: input.stairs, H_in: input.H_in })
+        : [];
+      if (stairErrs.length) {
+        const stairBadges = stairErrs.map(t => `<div class="badge warn">${t}</div>`).join("");
+        // Append into railValidation container (single badge area) so users see all warnings together
+        $("railValidation").innerHTML += stairBadges;
+      }
     } catch (err) {
       console.error(err);
       $("bomContent").innerHTML = `<div class="empty-state"><p style="color:#ff9090">Error: ${err.message}</p></div>`;
@@ -7136,9 +7407,76 @@ function addStair() {
         <div class="computed" data-stair-steps>-</div></div>
       <div class="field"><label>Rail length (auto)</label>
         <div class="computed" data-stair-rail-length>-</div></div>
+    </div>
+    <label class="toggle-row">
+      <input type="checkbox" data-stair-more> Configure shape, landings, platforms
+    </label>
+    <div data-stair-more-fields style="display:none">
+      <div class="row r2">
+        <div class="field"><label>Shape</label>
+          <select data-stair-shape>
+            <option value="linear">Linear (straight run)</option>
+            <option value="L">L-Shape (90&deg; landing)</option>
+            <option value="U">U-Shape (180&deg; switchback)</option>
+          </select></div>
+        <div class="field"><label>Top Platform <em>(transition pause)</em></label>
+          <select data-stair-top-platform>
+            <option value="">No</option>
+            <option value="yes">Yes</option>
+          </select></div>
+      </div>
+      <div class="row r2" data-stair-top-fields style="display:none">
+        <div class="field"><label>Top Platform Depth (ft)</label>
+          <input type="number" min="2" step="0.5" value="3" data-stair-top-depth inputmode="decimal"></div>
+        <div class="field"></div>
+      </div>
+      <div class="row r3" data-stair-landing-fields style="display:none">
+        <div class="field"><label>Landing Height <em>(in above grade)</em></label>
+          <input type="number" min="8" step="1" placeholder="e.g. 36" data-stair-landing-height inputmode="numeric"></div>
+        <div class="field"><label>Landing Depth (ft) <em>(&ge; stair width per code)</em></label>
+          <input type="number" min="3" step="0.5" placeholder="auto" data-stair-landing-depth inputmode="decimal"></div>
+        <div class="field" data-stair-landing-turn-wrap><label>Turn Direction</label>
+          <select data-stair-landing-turn>
+            <option value="right">Right (clockwise)</option>
+            <option value="left">Left (counter-clockwise)</option>
+          </select></div>
+      </div>
+      <div class="row r2">
+        <div class="field"><label>Bottom Landing</label>
+          <select data-stair-bottom-platform>
+            <option value="concrete">Concrete pad (2 bags)</option>
+            <option value="wood">Wood platform</option>
+          </select></div>
+      </div>
+      <div class="row r2" data-stair-bottom-wood-fields style="display:none">
+        <div class="field"><label>Wood Platform Width (ft)</label>
+          <input type="number" min="3" step="0.5" placeholder="auto" data-stair-bottom-width inputmode="decimal"></div>
+        <div class="field"><label>Wood Platform Depth (ft)</label>
+          <input type="number" min="3" step="0.5" placeholder="auto" data-stair-bottom-depth inputmode="decimal"></div>
+      </div>
     </div>`;
   $("stairList").appendChild(div);
-  div.querySelector("[data-stair-width]").addEventListener("input", recalc);
+
+  // Wire conditional visibility
+  function refreshVisibility() {
+    const showMore = div.querySelector("[data-stair-more]").checked;
+    div.querySelector("[data-stair-more-fields]").style.display = showMore ? "" : "none";
+    if (!showMore) return;
+    const shape = div.querySelector("[data-stair-shape]").value;
+    const topPlatform = div.querySelector("[data-stair-top-platform]").value === "yes";
+    const bottomPlatform = div.querySelector("[data-stair-bottom-platform]").value;
+    div.querySelector("[data-stair-top-fields]").style.display = topPlatform ? "" : "none";
+    div.querySelector("[data-stair-landing-fields]").style.display = (shape === "L" || shape === "U") ? "" : "none";
+    div.querySelector("[data-stair-landing-turn-wrap]").style.display = shape === "L" ? "" : "none";
+    div.querySelector("[data-stair-bottom-wood-fields]").style.display = bottomPlatform === "wood" ? "" : "none";
+  }
+
+  // Wire all inputs/selects
+  div.querySelectorAll("input,select").forEach(input => {
+    input.addEventListener("input", () => { refreshVisibility(); recalc(); });
+    input.addEventListener("change", () => { refreshVisibility(); recalc(); });
+  });
+  refreshVisibility();
   recalc();
 }
 
