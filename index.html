@@ -1032,6 +1032,52 @@ header p {
      ═════════════════════════════════════════════════════════════ -->
 <div class="form-pane">
 
+  <!-- STEP 0: Demo (Optional) -->
+  <div class="card">
+    <div class="card-header"><div class="step-num">0</div><h2>Demolition (Existing Deck)</h2></div>
+    <div class="card-body">
+      <label class="toggle-row"><input type="checkbox" id="demoEnabled"> Demo existing deck</label>
+      <div id="demoFields" style="display:none">
+        <div class="badge info">Demo labor covers deck + stair tread removal AND existing railing teardown. Dumpster size auto-recommended; user can override.</div>
+        <div class="row r3">
+          <div class="field">
+            <label>Existing Deck Length (ft)</label>
+            <input type="number" id="demoLength" min="1" step="0.5" placeholder="e.g. 14" inputmode="decimal">
+          </div>
+          <div class="field">
+            <label>Existing Deck Width (ft)</label>
+            <input type="number" id="demoWidth" min="1" step="0.5" placeholder="e.g. 12" inputmode="decimal">
+          </div>
+          <div class="field">
+            <label>Existing Deck Height (in)</label>
+            <input type="number" id="demoHeight" min="0" step="1" placeholder="e.g. 36" inputmode="numeric">
+          </div>
+        </div>
+        <div class="row r2">
+          <div class="field"><label>Existing Deck SF (auto)</label><div class="computed" id="demoSF">-</div></div>
+          <div class="field"><label>Estimated debris vol (auto)</label><div class="computed" id="demoVol">-</div></div>
+        </div>
+        <div style="margin-top:8px;">
+          <strong style="font-size:13px;color:var(--bone-soft);">Existing Stairs</strong>
+          <div id="demoStairList" style="display:flex;flex-direction:column;gap:8px;margin-top:6px;"></div>
+          <button class="btn" type="button" onclick="addDemoStair()" style="align-self:flex-start;margin-top:8px;">+ Add Existing Stair</button>
+        </div>
+        <div class="row r2" style="margin-top:8px;">
+          <div class="field">
+            <label>Dumpster Size</label>
+            <select id="demoDumpster">
+              <option value="auto">Auto-recommend</option>
+              <option value="10">10-yard</option>
+              <option value="20">20-yard</option>
+              <option value="30">30-yard</option>
+            </select>
+          </div>
+          <div class="field"><label>Recommended (auto)</label><div class="computed" id="demoRecommended">-</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- STEP 1: Dimensions & Type -->
   <div class="card">
     <div class="card-header"><div class="step-num">1</div><h2>Deck Dimensions & Type</h2></div>
@@ -1070,6 +1116,27 @@ header p {
       <div class="row r2">
         <div class="field"><label>Sq Footage (auto)</label><div class="computed" id="dSqFt">-</div></div>
         <div class="field"><label>Perimeter (auto)</label><div class="computed" id="dPerim">-</div></div>
+      </div>
+      <div class="field">
+        <label>Wall Lengths Against House <em>(ft — Left/Right walls extend from the back corner; flashing auto-calc)</em></label>
+        <div class="row r3" style="margin-top:6px;">
+          <div class="field">
+            <label style="font-size:11px;">Back (ft)</label>
+            <input type="number" id="wallBackLF" min="0" step="0.5" value="0" inputmode="decimal">
+          </div>
+          <div class="field">
+            <label style="font-size:11px;">Left (ft)</label>
+            <input type="number" id="wallLeftLF" min="0" step="0.5" value="0" inputmode="decimal">
+          </div>
+          <div class="field">
+            <label style="font-size:11px;">Right (ft)</label>
+            <input type="number" id="wallRightLF" min="0" step="0.5" value="0" inputmode="decimal">
+          </div>
+        </div>
+      </div>
+      <div class="row r2">
+        <div class="field"><label>Open Perimeter (auto)</label><div class="computed" id="dOpenPerim">-</div></div>
+        <div class="field"><label>Total Flashing (auto)</label><div class="computed" id="dFlashLF">-</div></div>
       </div>
       <hr>
       <label class="toggle-row"><input type="checkbox" id="resurfaceExisting"> Resurface existing deck (skip new framing)</label>
@@ -1205,8 +1272,57 @@ header p {
   <div class="card">
     <div class="card-header"><div class="step-num">7</div><h2>Railing</h2></div>
     <div class="card-body">
-      <div id="railList" style="display:flex;flex-direction:column;gap:12px;"></div>
-      <button class="btn" type="button" onclick="addRailRun()" style="align-self:flex-start;">+ Add Railing Run</button>
+      <label class="toggle-row">
+        <input type="checkbox" id="railAutoRoute"> Auto-route railing from deck perimeter <em>(one run per open side, optimal 6'/8' packing)</em>
+      </label>
+
+      <!-- Shared config (shown when auto-route is ON). Same data attributes as manual run
+           cards so the existing cascade wiring works without duplication. -->
+      <div id="railAutoConfig" style="display:none">
+        <div class="badge info">All open sides will be auto-routed with this shared config. Section size auto-optimizes 6'/8' for minimum cuts. Stair flights are added separately below.</div>
+        <div class="row r2">
+          <div class="field"><label>Material</label>
+            <select data-rail-material>
+              <option value="">— Select —</option>
+              <option value="pvc">PVC</option>
+              <option value="composite">Composite</option>
+              <option value="metal">Metal</option>
+              <option value="premium_vinyl">Premium Vinyl</option>
+            </select></div>
+          <div class="field"><label>Collection</label>
+            <select data-rail-collection><option value="">— Select Material —</option></select></div>
+        </div>
+        <div class="row r2">
+          <div class="field"><label>Height</label>
+            <select data-rail-height><option value="36">36"</option><option value="42">42"</option></select></div>
+          <div class="field"><label>Color</label>
+            <select data-rail-color><option value="">— Pick collection —</option></select></div>
+        </div>
+        <div class="row r2">
+          <div class="field"><label>Top Rail</label>
+            <select data-rail-toprail><option value="">— Pick collection —</option></select></div>
+          <div class="field"><label>Infill</label>
+            <select data-rail-infill><option value="">— Pick collection —</option></select></div>
+        </div>
+        <div class="row r2">
+          <div class="field"><label>Post Size</label>
+            <select data-rail-sleeve><option value="">— Pick collection —</option></select></div>
+          <div class="field"><label>Post Cap</label>
+            <select data-rail-cap><option value="">— Pick post size —</option></select></div>
+        </div>
+        <div class="row r2">
+          <div class="field"><label>Post Skirt</label>
+            <select data-rail-skirt><option value="">— Pick post size —</option></select></div>
+          <div class="field"><label>Generated Runs (auto)</label>
+            <div class="computed" id="autoRunsPreview" style="font-size:12px;line-height:1.4;">-</div></div>
+        </div>
+      </div>
+
+      <!-- Manual runs (shown when auto-route is OFF) -->
+      <div id="railManualSection">
+        <div id="railList" style="display:flex;flex-direction:column;gap:12px;"></div>
+        <button class="btn" type="button" onclick="addRailRun()" style="align-self:flex-start;">+ Add Railing Run</button>
+      </div>
       <div id="railValidation"></div>
     </div>
   </div>
@@ -1391,65 +1507,65 @@ const PRICES_TIMBERTECH = {"A55X55ICAPMB": 45.0,
    "ADB13520EW": 98.0,
    "ADB13520MH": 98.0,
    "ADB13520WT": 98.0,
-   "ADB15516AW": 119.0,
-   "ADB15516BD": 119.0,
+   "ADB15516AW": 147.71,
+   "ADB15516BD": 147.71,
    "ADB15516CG": 119.0,
-   "ADB15516CS": 119.0,
-   "ADB15516CY": 119.0,
-   "ADB15516DH": 119.0,
-   "ADB15516EW": 119.0,
-   "ADB15516FW": 119.0,
-   "ADB15516KOAAT": 105.0,
-   "ADB15516MH": 119.0,
+   "ADB15516CS": 170.13,
+   "ADB15516CY": 170.13,
+   "ADB15516DH": 170.13,
+   "ADB15516EW": 170.13,
+   "ADB15516FW": 147.71,
+   "ADB15516KOAAT": 117.33,
+   "ADB15516MH": 170.13,
    "ADB15516TBG": 105.0,
-   "ADB15516TWH": 105.0,
-   "ADB15516WT": 119.0,
-   "ADB15520AW": 149.0,
-   "ADB15520BD": 149.0,
+   "ADB15516TWH": 147.71,
+   "ADB15516WT": 170.13,
+   "ADB15520AW": 184.63,
+   "ADB15520BD": 184.63,
    "ADB15520CG": 149.0,
-   "ADB15520CS": 149.0,
-   "ADB15520CY": 149.0,
-   "ADB15520DH": 149.0,
-   "ADB15520EW": 149.0,
-   "ADB15520FW": 149.0,
-   "ADB15520KOAAT": 131.0,
-   "ADB15520MH": 149.0,
+   "ADB15520CS": 212.71,
+   "ADB15520CY": 212.71,
+   "ADB15520DH": 212.71,
+   "ADB15520EW": 212.71,
+   "ADB15520FW": 184.63,
+   "ADB15520KOAAT": 146.68,
+   "ADB15520MH": 212.71,
    "ADB15520TBG": 131.0,
-   "ADB15520TWH": 131.0,
-   "ADB15520WT": 149.0,
-   "ADB172516CS": 135.0,
-   "ADB172516CY": 135.0,
-   "ADB172516DH": 135.0,
-   "ADB172516EW": 135.0,
-   "ADB172516MH": 135.0,
-   "ADB172516WT": 135.0,
-   "ADB172520CS": 168.0,
-   "ADB172520CY": 168.0,
-   "ADB172520DH": 168.0,
-   "ADB172520EW": 168.0,
-   "ADB172520MH": 168.0,
-   "ADB172520WT": 168.0,
-   "ADB25512CS": 135.0,
-   "ADB25516CS": 178.0,
-   "ADB25520CS": 222.0,
-   "ADCB15512BS": 79.0,
+   "ADB15520TWH": 184.63,
+   "ADB15520WT": 212.71,
+   "ADB172516CS": 236.89,
+   "ADB172516CY": 236.89,
+   "ADB172516DH": 236.89,
+   "ADB172516EW": 236.89,
+   "ADB172516MH": 236.89,
+   "ADB172516WT": 236.89,
+   "ADB172520CS": 296.14,
+   "ADB172520CY": 296.14,
+   "ADB172520DH": 296.14,
+   "ADB172520EW": 296.14,
+   "ADB172520MH": 296.14,
+   "ADB172520WT": 296.14,
+   "ADB25512CS": 166.38,
+   "ADB25516CS": 221.85,
+   "ADB25520CS": 277.3,
+   "ADCB15512BS": 88.03,
    "ADCB15512SG": 79.0,
-   "ADCB15516BS": 105.0,
+   "ADCB15516BS": 117.33,
    "ADCB15516SG": 105.0,
-   "ADCB15520BS": 131.0,
+   "ADCB15520BS": 146.68,
    "ADCB15520SG": 131.0,
-   "ADCB172516BS": 135.0,
-   "ADCB172516SG": 135.0,
-   "ADCB172520BS": 168.0,
-   "ADCB172520SG": 168.0,
-   "ADCB25512SG": 135.0,
-   "ADCB25516SG": 178.0,
-   "ADCB25520SG": 222.0,
+   "ADCB172516BS": 123.65,
+   "ADCB172516SG": 123.65,
+   "ADCB172520BS": 154.56,
+   "ADCB172520SG": 154.56,
+   "ADCB25512SG": 104.8,
+   "ADCB25516SG": 139.75,
+   "ADCB25520SG": 174.69,
    "ADCP13510SG": 59.0,
    "ADCP13512SG": 71.0,
    "ADCP13516SG": 94.0,
-   "ADCR5117512BS": 195.0,
-   "ADCR5117512SG": 195.0,
+   "ADCR5117512BS": 93.18,
+   "ADCR5117512SG": 93.18,
    "ADL55X55CAPMOD": 95.0,
    "ADL55X55ICAPMODMB": 89.0,
    "ADL55X55ICAPMODME": 89.0,
@@ -1484,64 +1600,64 @@ const PRICES_TIMBERTECH = {"A55X55ICAPMB": 45.0,
    "ADP15516EW": 113.0,
    "ADP15516MH": 113.0,
    "ADP15516WT": 113.0,
-   "ADR5117512AW": 215.0,
-   "ADR5117512BD": 215.0,
-   "ADR5117512CG": 215.0,
-   "ADR5117512CS": 215.0,
-   "ADR5117512CY": 215.0,
-   "ADR5117512DH": 215.0,
-   "ADR5117512EW": 215.0,
-   "ADR5117512FW": 215.0,
+   "ADR5117512AW": 157.53,
+   "ADR5117512BD": 157.53,
+   "ADR5117512CG": 157.53,
+   "ADR5117512CS": 236.46,
+   "ADR5117512CY": 236.46,
+   "ADR5117512DH": 236.46,
+   "ADR5117512EW": 236.46,
+   "ADR5117512FW": 157.53,
    "ADR5117512KOAAT": 195.0,
-   "ADR5117512MH": 215.0,
-   "ADR5117512TBG": 195.0,
-   "ADR5117512TWH": 195.0,
-   "ADR5117512WT": 215.0,
+   "ADR5117512MH": 236.46,
+   "ADR5117512TBG": 122.87,
+   "ADR5117512TWH": 122.87,
+   "ADR5117512WT": 236.46,
    "ADSHWKMB-KIT": 55.0,
    "ADSHWKME-KIT": 55.0,
    "ADSHWKMW-KIT": 55.0,
-   "AGB15512AW": 89.0,
-   "AGB15512BD": 89.0,
-   "AGB15512BS": 79.0,
+   "AGB15512AW": 110.8,
+   "AGB15512BD": 110.8,
+   "AGB15512BS": 88.03,
    "AGB15512CG": 89.0,
-   "AGB15512CS": 89.0,
-   "AGB15512CY": 89.0,
-   "AGB15512DH": 89.0,
-   "AGB15512EW": 89.0,
-   "AGB15512FW": 89.0,
-   "AGB15512MH": 89.0,
+   "AGB15512CS": 127.61,
+   "AGB15512CY": 127.61,
+   "AGB15512DH": 127.61,
+   "AGB15512EW": 127.61,
+   "AGB15512FW": 110.8,
+   "AGB15512MH": 127.61,
    "AGB15512SG": 79.0,
    "AGB15512TBG": 79.0,
-   "AGB15512TWH": 79.0,
-   "AGB15512WT": 89.0,
-   "AGB15516AW": 119.0,
-   "AGB15516BD": 119.0,
-   "AGB15516BS": 105.0,
+   "AGB15512TWH": 110.8,
+   "AGB15512WT": 127.61,
+   "AGB15516AW": 147.71,
+   "AGB15516BD": 147.71,
+   "AGB15516BS": 117.33,
    "AGB15516CG": 119.0,
-   "AGB15516CS": 119.0,
-   "AGB15516CY": 119.0,
-   "AGB15516DH": 119.0,
-   "AGB15516EW": 119.0,
-   "AGB15516FW": 119.0,
-   "AGB15516MH": 119.0,
+   "AGB15516CS": 170.13,
+   "AGB15516CY": 170.13,
+   "AGB15516DH": 170.13,
+   "AGB15516EW": 170.13,
+   "AGB15516FW": 147.71,
+   "AGB15516MH": 170.13,
    "AGB15516SG": 105.0,
    "AGB15516TBG": 105.0,
-   "AGB15516TWH": 105.0,
-   "AGB15516WT": 119.0,
-   "AGB15520AW": 149.0,
-   "AGB15520BD": 149.0,
-   "AGB15520BS": 131.0,
+   "AGB15516TWH": 147.71,
+   "AGB15516WT": 170.13,
+   "AGB15520AW": 184.63,
+   "AGB15520BD": 184.63,
+   "AGB15520BS": 146.68,
    "AGB15520CG": 149.0,
-   "AGB15520CS": 149.0,
-   "AGB15520CY": 149.0,
-   "AGB15520DH": 149.0,
-   "AGB15520EW": 149.0,
-   "AGB15520FW": 149.0,
-   "AGB15520MH": 149.0,
+   "AGB15520CS": 212.71,
+   "AGB15520CY": 212.71,
+   "AGB15520DH": 212.71,
+   "AGB15520EW": 212.71,
+   "AGB15520FW": 184.63,
+   "AGB15520MH": 212.71,
    "AGB15520SG": 131.0,
    "AGB15520TBG": 131.0,
-   "AGB15520TWH": 131.0,
-   "AGB15520WT": 149.0,
+   "AGB15520TWH": 184.63,
+   "AGB15520WT": 212.71,
    "APTR10MB": 125.0,
    "APTR10ME": 125.0,
    "APTR10MW": 125.0,
@@ -1554,21 +1670,21 @@ const PRICES_TIMBERTECH = {"A55X55ICAPMB": 45.0,
    "APTR8ME": 99.0,
    "APTR8MW": 99.0,
    "APTR8W": 99.0,
-   "ARISER72512AW": 75.0,
-   "ARISER72512BD": 75.0,
-   "ARISER72512BS": 68.0,
-   "ARISER72512CG": 75.0,
-   "ARISER72512CS": 75.0,
-   "ARISER72512CY": 75.0,
-   "ARISER72512DH": 75.0,
-   "ARISER72512EW": 75.0,
-   "ARISER72512FW": 75.0,
-   "ARISER72512KO": 68.0,
-   "ARISER72512MH": 75.0,
-   "ARISER72512SG": 68.0,
-   "ARISER72512TBG": 68.0,
-   "ARISER72512TWH": 68.0,
-   "ARISER72512WT": 75.0,
+   "ARISER72512AW": 137.61,
+   "ARISER72512BD": 137.61,
+   "ARISER72512BS": 81.52,
+   "ARISER72512CG": 137.61,
+   "ARISER72512CS": 167.97,
+   "ARISER72512CY": 167.97,
+   "ARISER72512DH": 167.97,
+   "ARISER72512EW": 167.97,
+   "ARISER72512FW": 137.61,
+   "ARISER72512KO": 81.52,
+   "ARISER72512MH": 167.97,
+   "ARISER72512SG": 81.52,
+   "ARISER72512TBG": 107.34,
+   "ARISER72512TWH": 107.34,
+   "ARISER72512WT": 167.97,
    "ATLOC100B": 38.0,
    "ATLOC100DB": 38.0,
    "ATLOC100DG": 38.0,
@@ -2208,91 +2324,94 @@ const PRICES_TIMBERTECH = {"A55X55ICAPMB": 45.0,
    "DSDBLCOMBO16W": 89.0,
    "DSFBRACKET12B": 28.0,
    "DSFBRACKET12W": 28.0,
-   "EF5416DT": 61.0,
-   "EF5416MG": 61.0,
-   "EF5420DT": 76.0,
-   "EF5420MG": 76.0,
-   "EFGV5412DT": 46.0,
-   "EFGV5412MG": 46.0,
-   "EFGV5416DT": 61.0,
-   "EFGV5416MG": 61.0,
-   "EFGV5420DT": 76.0,
-   "EFGV5420MG": 76.0,
+   "EF5416DT": 91.96,
+   "EF5416MG": 91.96,
+   "EF5420DT": 114.93,
+   "EF5420MG": 114.93,
+   "EFGV5412DT": 68.83,
+   "EFGV5412MG": 68.83,
+   "EFGV5416DT": 91.96,
+   "EFGV5416MG": 91.96,
+   "EFGV5420DT": 114.93,
+   "EFGV5420MG": 114.93,
    "ELOC250": 219.0,
    "ELOC55": 62.0,
    "ELOCBULK": 95.0,
-   "ERISERCH": 32.0,
-   "ERISERDC": 32.0,
-   "ERISERDT": 32.0,
-   "ERISERMG": 32.0,
-   "ERISERST": 32.0,
-   "ES5416DT": 57.0,
-   "ES5416MG": 57.0,
-   "ES5420DT": 71.0,
-   "ES5420MG": 71.0,
-   "ESGV5412DT": 43.0,
-   "ESGV5412MG": 43.0,
-   "ESGV5416DT": 57.0,
-   "ESGV5416MG": 57.0,
-   "ESGV5420DT": 71.0,
-   "ESGV5420MG": 71.0,
-   "FBE12CH": 62.0,
-   "FBE12DC": 62.0,
-   "FBE12DT": 55.0,
-   "FBE12MG": 55.0,
-   "FBE12ST": 62.0,
-   "FBLC12AW": 89.0,
-   "FBLC12E": 89.0,
-   "FBLC12M": 89.0,
-   "FBLC12P": 89.0,
-   "FBLC12TW": 89.0,
-   "FBLC12WC": 89.0,
+   "ERISERCH": 84.43,
+   "ERISERDC": 84.43,
+   "ERISERDT": 81.96,
+   "ERISERMG": 81.96,
+   "ERISERST": 84.43,
+   "ES5416DT": 64.23,
+   "ES5416MG": 64.23,
+   "ES5420DT": 80.26,
+   "ES5420MG": 80.26,
+   "ESGV5412DT": 48.01,
+   "ESGV5412MG": 48.01,
+   "ESGV5416DT": 64.23,
+   "ESGV5416MG": 64.23,
+   "ESGV5420DT": 80.26,
+   "ESGV5420MG": 80.26,
+   "FBE12CH": 145.07,
+   "FBE12DC": 145.07,
+   "FBE12DT": 142.89,
+   "FBE12MG": 142.89,
+   "FBE12ST": 145.07,
+   "FBLC12AW": 215.02,
+   "FBLC12E": 215.02,
+   "FBLC12M": 215.02,
+   "FBLC12P": 215.02,
+   "FBLC12TW": 215.02,
+   "FBLC12WC": 215.02,
    "FBPRP12NO": 55.0,
-   "FBRC12AL": 89.0,
-   "FBRC12DR": 89.0,
-   "FBRC12DW": 89.0,
-   "FBRC12RC": 89.0,
-   "FBTC12BO": 72.0,
-   "FBTC12DO": 79.0,
-   "FBTC12NW": 79.0,
-   "FBTC12SM": 72.0,
-   "FBTC12WO": 79.0,
-   "LC5416AW": 92.0,
-   "LC5416E": 92.0,
-   "LC5416M": 92.0,
-   "LC5416P": 92.0,
-   "LC5416TW": 92.0,
-   "LC5416WC": 92.0,
-   "LC5420AW": 115.0,
-   "LC5420E": 115.0,
-   "LC5420M": 115.0,
-   "LC5420P": 115.0,
-   "LC5420TW": 115.0,
-   "LC5420WC": 115.0,
-   "LCGV5412AW": 69.0,
-   "LCGV5412E": 69.0,
-   "LCGV5412M": 69.0,
-   "LCGV5412P": 69.0,
-   "LCGV5412TW": 69.0,
-   "LCGV5412WC": 69.0,
-   "LCGV5416AW": 92.0,
-   "LCGV5416E": 92.0,
-   "LCGV5416M": 92.0,
-   "LCGV5416P": 92.0,
-   "LCGV5416TW": 92.0,
-   "LCGV5416WC": 92.0,
-   "LCGV5420AW": 115.0,
-   "LCGV5420E": 115.0,
-   "LCGV5420M": 115.0,
-   "LCGV5420P": 115.0,
-   "LCGV5420TW": 115.0,
-   "LCGV5420WC": 115.0,
-   "LCRISERAW": 42.0,
-   "LCRISERE": 42.0,
-   "LCRISERM": 42.0,
-   "LCRISERP": 42.0,
-   "LCRISERTW": 42.0,
-   "LCRISERWC": 42.0,
+   "FBRC12AL": 184.98,
+   "FBRC12DR": 184.98,
+   "FBRC12DW": 184.98,
+   "FBRC12RC": 184.98,
+   "FBTC12BO": 145.07,
+   "FBTC12DO": 145.07,
+   "FBTC12NW": 145.07,
+   "FBTC12RE": 142.89,
+   "FBTC12SA": 142.89,
+   "FBTC12SB": 142.89,
+   "FBTC12SM": 145.07,
+   "FBTC12WO": 145.07,
+   "LC5416AW": 157.64,
+   "LC5416E": 157.64,
+   "LC5416M": 157.64,
+   "LC5416P": 157.64,
+   "LC5416TW": 157.64,
+   "LC5416WC": 157.64,
+   "LC5420AW": 197.04,
+   "LC5420E": 197.04,
+   "LC5420M": 197.04,
+   "LC5420P": 197.04,
+   "LC5420TW": 197.04,
+   "LC5420WC": 197.04,
+   "LCGV5412AW": 118.0,
+   "LCGV5412E": 118.0,
+   "LCGV5412M": 118.0,
+   "LCGV5412P": 118.0,
+   "LCGV5412TW": 118.0,
+   "LCGV5412WC": 118.0,
+   "LCGV5416AW": 157.64,
+   "LCGV5416E": 157.64,
+   "LCGV5416M": 157.64,
+   "LCGV5416P": 157.64,
+   "LCGV5416TW": 157.64,
+   "LCGV5416WC": 157.64,
+   "LCGV5420AW": 197.04,
+   "LCGV5420E": 197.04,
+   "LCGV5420M": 197.04,
+   "LCGV5420P": 197.04,
+   "LCGV5420TW": 197.04,
+   "LCGV5420WC": 197.04,
+   "LCRISERAW": 124.3,
+   "LCRISERE": 124.3,
+   "LCRISERM": 124.3,
+   "LCRISERP": 124.3,
+   "LCRISERTW": 124.3,
+   "LCRISERWC": 124.3,
    "PN40350F-6K36": 245.0,
    "PN40350F-6K36/S": 245.0,
    "PN40350F-6K42": 265.0,
@@ -2307,21 +2426,21 @@ const PRICES_TIMBERTECH = {"A55X55ICAPMB": 45.0,
    "PN40DP42-1": 89.0,
    "PN40DP42-3": 89.0,
    "PN40STAIRSET": 39.0,
-   "PR5416CH": 62.0,
-   "PR5416DC": 62.0,
-   "PR5416ST": 62.0,
-   "PR5420CH": 78.0,
-   "PR5420DC": 78.0,
-   "PR5420ST": 78.0,
-   "PRGV5412CH": 47.0,
-   "PRGV5412DC": 47.0,
-   "PRGV5412ST": 47.0,
-   "PRGV5416CH": 62.0,
-   "PRGV5416DC": 62.0,
-   "PRGV5416ST": 62.0,
-   "PRGV5420CH": 78.0,
-   "PRGV5420DC": 78.0,
-   "PRGV5420ST": 78.0,
+   "PR5416CH": 73.78,
+   "PR5416DC": 73.78,
+   "PR5416ST": 73.78,
+   "PR5420CH": 92.24,
+   "PR5420DC": 92.24,
+   "PR5420ST": 92.24,
+   "PRGV5412CH": 55.2,
+   "PRGV5412DC": 55.2,
+   "PRGV5412ST": 55.2,
+   "PRGV5416CH": 73.78,
+   "PRGV5416DC": 73.78,
+   "PRGV5416ST": 73.78,
+   "PRGV5420CH": 92.24,
+   "PRGV5420DC": 92.24,
+   "PRGV5420ST": 92.24,
    "PRP5416NO": 62.0,
    "PRP5420NO": 78.0,
    "PRPGV5412NO": 47.0,
@@ -2333,50 +2452,50 @@ const PRICES_TIMBERTECH = {"A55X55ICAPMB": 45.0,
    "PTCS25X65B": 42.0,
    "PTCS325X65B": 48.0,
    "PTCS4X65B": 52.0,
-   "RC5416AL": 85.0,
+   "RC5416AL": 130.62,
    "RC5416AL-FR": 99.0,
-   "RC5416DR": 85.0,
+   "RC5416DR": 130.62,
    "RC5416DR-FR": 99.0,
-   "RC5416DW": 85.0,
+   "RC5416DW": 130.62,
    "RC5416DW-FR": 99.0,
-   "RC5416RC": 85.0,
+   "RC5416RC": 130.62,
    "RC5416RC-FR": 99.0,
-   "RC5420AL": 107.0,
+   "RC5420AL": 163.27,
    "RC5420AL-FR": 123.0,
-   "RC5420DR": 107.0,
+   "RC5420DR": 163.27,
    "RC5420DR-FR": 123.0,
-   "RC5420DW": 107.0,
+   "RC5420DW": 163.27,
    "RC5420DW-FR": 123.0,
-   "RC5420RC": 107.0,
+   "RC5420RC": 163.27,
    "RC5420RC-FR": 123.0,
-   "RCGV5412AL": 69.0,
+   "RCGV5412AL": 97.82,
    "RCGV5412AL-FR": 79.0,
-   "RCGV5412DR": 69.0,
+   "RCGV5412DR": 97.82,
    "RCGV5412DR-FR": 79.0,
-   "RCGV5412DW": 69.0,
+   "RCGV5412DW": 97.82,
    "RCGV5412DW-FR": 79.0,
-   "RCGV5412RC": 69.0,
+   "RCGV5412RC": 97.82,
    "RCGV5412RC-FR": 79.0,
-   "RCGV5416AL": 85.0,
+   "RCGV5416AL": 130.62,
    "RCGV5416AL-FR": 99.0,
-   "RCGV5416DR": 85.0,
+   "RCGV5416DR": 130.62,
    "RCGV5416DR-FR": 99.0,
-   "RCGV5416DW": 85.0,
+   "RCGV5416DW": 130.62,
    "RCGV5416DW-FR": 99.0,
-   "RCGV5416RC": 85.0,
+   "RCGV5416RC": 130.62,
    "RCGV5416RC-FR": 99.0,
-   "RCGV5420AL": 107.0,
+   "RCGV5420AL": 163.27,
    "RCGV5420AL-FR": 123.0,
-   "RCGV5420DR": 107.0,
+   "RCGV5420DR": 163.27,
    "RCGV5420DR-FR": 123.0,
-   "RCGV5420DW": 107.0,
+   "RCGV5420DW": 163.27,
    "RCGV5420DW-FR": 123.0,
-   "RCGV5420RC": 107.0,
+   "RCGV5420RC": 163.27,
    "RCGV5420RC-FR": 123.0,
-   "RCRISERAL": 42.0,
-   "RCRISERDR": 42.0,
-   "RCRISERDW": 42.0,
-   "RCRISERRC": 42.0,
+   "RCRISERAL": 107.22,
+   "RCRISERDR": 107.22,
+   "RCRISERDW": 107.22,
+   "RCRISERRC": 107.22,
    "SLOC100SF188": 62.0,
    "SLOC100SF238MG": 62.0,
    "SLOC200SF188": 109.0,
@@ -2421,36 +2540,54 @@ const PRICES_TIMBERTECH = {"A55X55ICAPMB": 45.0,
    "T5X5PSKIRTME": 29.0,
    "T5X5PSKIRTMW": 29.0,
    "T5X5PSKIRTW": 29.0,
-   "TC5416BO": 74.0,
-   "TC5416DO": 82.0,
-   "TC5416NW": 82.0,
-   "TC5416SM": 74.0,
-   "TC5416WO": 82.0,
-   "TC5420BO": 92.0,
-   "TC5420DO": 103.0,
-   "TC5420NW": 103.0,
-   "TC5420SM": 92.0,
-   "TC5420WO": 103.0,
-   "TCGV5412BO": 55.0,
-   "TCGV5412DO": 62.0,
-   "TCGV5412NW": 62.0,
-   "TCGV5412SM": 55.0,
-   "TCGV5412WO": 62.0,
-   "TCGV5416BO": 74.0,
-   "TCGV5416DO": 82.0,
-   "TCGV5416NW": 82.0,
-   "TCGV5416SM": 74.0,
-   "TCGV5416WO": 82.0,
-   "TCGV5420BO": 92.0,
-   "TCGV5420DO": 103.0,
-   "TCGV5420NW": 103.0,
-   "TCGV5420SM": 92.0,
-   "TCGV5420WO": 103.0,
-   "TCRISERBO": 32.0,
-   "TCRISERDO": 38.0,
-   "TCRISERNW": 38.0,
-   "TCRISERSM": 32.0,
-   "TCRISERWO": 38.0,
+   "TC5416BO": 94.76,
+   "TC5416DO": 94.76,
+   "TC5416NW": 94.76,
+   "TC5416RE": 79.67,
+   "TC5416SA": 79.67,
+   "TC5416SB": 79.67,
+   "TC5416SM": 94.76,
+   "TC5416WO": 94.76,
+   "TC5420BO": 118.45,
+   "TC5420DO": 118.45,
+   "TC5420NW": 118.45,
+   "TC5420RE": 99.58,
+   "TC5420SA": 99.58,
+   "TC5420SB": 99.58,
+   "TC5420SM": 118.45,
+   "TC5420WO": 118.45,
+   "TCGV5412BO": 70.93,
+   "TCGV5412DO": 70.93,
+   "TCGV5412NW": 70.93,
+   "TCGV5412RE": 59.61,
+   "TCGV5412SA": 59.61,
+   "TCGV5412SB": 59.61,
+   "TCGV5412SM": 70.93,
+   "TCGV5412WO": 70.93,
+   "TCGV5416BO": 94.76,
+   "TCGV5416DO": 94.76,
+   "TCGV5416NW": 94.76,
+   "TCGV5416RE": 79.67,
+   "TCGV5416SA": 79.67,
+   "TCGV5416SB": 79.67,
+   "TCGV5416SM": 94.76,
+   "TCGV5416WO": 94.76,
+   "TCGV5420BO": 118.45,
+   "TCGV5420DO": 118.45,
+   "TCGV5420NW": 118.45,
+   "TCGV5420RE": 99.58,
+   "TCGV5420SA": 99.58,
+   "TCGV5420SB": 99.58,
+   "TCGV5420SM": 118.45,
+   "TCGV5420WO": 118.45,
+   "TCRISERBO": 84.43,
+   "TCRISERDO": 84.43,
+   "TCRISERNW": 84.43,
+   "TCRISERRE": 81.96,
+   "TCRISERSA": 81.96,
+   "TCRISERSB": 81.96,
+   "TCRISERSM": 84.43,
+   "TCRISERWO": 84.43,
    "TCU36KIT6MW": 195.0,
    "TCU36KIT6W": 195.0,
    "TCU36KIT8MW": 195.0,
@@ -4344,17 +4481,24 @@ function selectFooting(NCRegion, postCount, attachment) {
   };
 }
 
-function countLedgerSystem(W_ft, joistSize, joistSpanFt, attachment) {
+function countLedgerSystem(W_ft, joistSize, joistSpanFt, attachment, backWallLF) {
   if (attachment !== "attached") return [];
+  // If backWallLF wasn't passed at all (undefined / null), assume full back wall for
+  // back-compat with the old boolean-checkbox model. If it WAS passed (even as 0),
+  // honor the value — backWallLF=0 means user said "no back wall."
+  let ledgerLen_ft;
+  if (backWallLF == null)            ledgerLen_ft = W_ft;
+  else                                ledgerLen_ft = Math.min(Math.max(0, +backWallLF), W_ft);
+  if (ledgerLen_ft <= 0) return [];
 
-  const ledgerLengthFt = nextStandardLength(W_ft);
+  const ledgerLengthFt = nextStandardLength(ledgerLen_ft);
   const joistDepthIn = parseInt(joistSize.split("x")[1]);   // 2x10 → 10
   const lagSpacingIn = LEDGER_LAG_SPACING_IN[String(Math.min(18, Math.max(6, Math.ceil(joistSpanFt))))] || 18;
   const lagsPerLF = 12 / lagSpacingIn;
-  const lagCount = Math.ceil(W_ft * lagsPerLF) + 4;          // +4 = 2 at each end
-  const dttCount = Math.max(IRC_R507_LATERAL.dtt2z_min_count, Math.ceil(W_ft / IRC_R507_LATERAL.dtt2z_lf_per_unit));
+  const lagCount = Math.ceil(ledgerLen_ft * lagsPerLF) + 4;          // +4 = 2 at each end
+  const dttCount = Math.max(IRC_R507_LATERAL.dtt2z_min_count, Math.ceil(ledgerLen_ft / IRC_R507_LATERAL.dtt2z_lf_per_unit));
   const sdsCount = dttCount * 12;
-  const membraneSqFt = W_ft * (joistDepthIn + 6) / 12;       // ledger height + 6" extra below
+  const membraneSqFt = ledgerLen_ft * (joistDepthIn + 6) / 12;       // ledger height + 6" extra below
 
   return [
     makeBOMLine({
@@ -4367,9 +4511,9 @@ function countLedgerSystem(W_ft, joistSize, joistSpanFt, attachment) {
     }),
     makeBOMLine({
       category: "framing",
-      description: `Z-flashing along ledger top`,
+      description: `Z-flashing along ledger top (back wall)`,
       sku: "Z-FLASH",
-      qty_raw: W_ft,
+      qty_raw: ledgerLen_ft,
       unit: "lf"
     }),
     makeBOMLine({
@@ -5256,8 +5400,10 @@ function validateStairs({ stairs = [], H_in }) {
         errors.push(`Stair ${idx+1}: Landing height ${lh}" must be between one riser (7.75") and one riser below the deck (${(H_in - 7.75).toFixed(1)}").`);
       }
     }
-    // R311.7.6 — landing depth must be >= stair width (square or larger)
-    if ((shape === "L" || shape === "U") && stair.landingDepth != null) {
+    // R311.7.6 — landing depth must be >= stair width (square or larger).
+    // Only validate when the user explicitly entered a non-zero depth; a 0 / blank
+    // value means "use auto-default = stair width" and is safe.
+    if ((shape === "L" || shape === "U") && stair.landingDepth != null && +stair.landingDepth > 0) {
       const ld = +stair.landingDepth;
       if (ld < stair.width) {
         errors.push(`Stair ${idx+1}: Landing depth ${ld}' is less than stair width ${stair.width}' (IRC R311.7.6 requires landings be at least as deep as the stair is wide).`);
@@ -5414,8 +5560,11 @@ function validateRailing({ runs = [], deckingScalloped = false }) {
     const totalLF = (run.levelLengthFt || 0) + (run.stairLengthFt || 0) || (run.lengthFt || 0);
     const openings = totalLF > 0 ? Math.ceil(totalLF / (run.sectionLengthFt || 6)) : 0;
     const totalCorners = (run.corners90 || 0) + (run.corners45 || 0);
-    if (totalCorners > Math.max(0, openings - 1)) {
-      errors.push(`Run ${i+1}: ${totalCorners} corners declared but only ${Math.max(0, openings-1)} inline post slots exist for this run length. Add length or remove corners.`);
+    // Corner posts can occupy ANY post slot in the run (end posts or inline).
+    // Total posts = openings + 1. Max corners can equal that count.
+    const totalPostSlots = openings > 0 ? openings + 1 : 0;
+    if (totalCorners > totalPostSlots) {
+      errors.push(`Run ${i+1}: ${totalCorners} corners declared but only ${totalPostSlots} post slots exist for this run length. Add length or remove corners.`);
     }
     // Wall mount kit only supported by Impression
     if (run.wallTerminations > 0 && run.collection !== "impression") {
@@ -5587,6 +5736,64 @@ function resolveBalusterPackSKU(run) {
 
 // Decompose a run into level + stair portions and structural counts.
 // Back-compat: if levelLengthFt/stairLengthFt are missing, derive from lengthFt + hasStair.
+// ─── Auto-routed railing helpers ─────────────────────────────────────
+// Compute open vs walled portions of each rectangular deck side. The walls
+// param is now {back, front, left, right} as LENGTHS in ft (0 = no wall on
+// that side, sideLength = fully walled). Legacy booleans are accepted too
+// for back-compat.
+function _computeOpenSides({ P_ft, W_ft, walls }) {
+  function _wallLF(side, fullLen) {
+    const v = walls?.[side];
+    if (typeof v === "boolean") return v ? fullLen : 0;   // legacy bool support
+    return Math.max(0, Math.min(fullLen, +v || 0));
+  }
+  // Convention: Back/Front = the WIDTH-side of the deck; Left/Right = PROJECTION side.
+  const sides = [
+    { name: "back",  length_ft: W_ft, wall_ft: _wallLF("back",  W_ft) },
+    { name: "front", length_ft: W_ft, wall_ft: _wallLF("front", W_ft) },
+    { name: "left",  length_ft: P_ft, wall_ft: _wallLF("left",  P_ft) },
+    { name: "right", length_ft: P_ft, wall_ft: _wallLF("right", P_ft) }
+  ].map(s => ({ ...s, open_ft: Math.max(0, s.length_ft - s.wall_ft), isWall: s.wall_ft >= s.length_ft }));
+  const openSides = sides.filter(s => s.open_ft > 0);
+  const totalOpenLF = openSides.reduce((acc, s) => acc + s.open_ft, 0);
+  const totalWallLF = sides.reduce((acc, s) => acc + s.wall_ft, 0);
+  // Count 90-deg corners where two adjacent sides BOTH have any open length.
+  // (Partial-wall sides still contribute a corner because the open portion
+  // wraps to the adjacent side's open portion.)
+  const hasOpen = name => sides.find(s => s.name === name && s.open_ft > 0) != null;
+  let corners90 = 0;
+  if (hasOpen("back")  && hasOpen("left"))  corners90++;
+  if (hasOpen("back")  && hasOpen("right")) corners90++;
+  if (hasOpen("front") && hasOpen("left"))  corners90++;
+  if (hasOpen("front") && hasOpen("right")) corners90++;
+  return { sides, openSides, totalOpenLF, totalWallLF, corners90 };
+}
+
+// Pack a run length into 6'/8' sections, minimizing total sections then waste.
+// Returns { sections, waste, mix: {8, 6}, dominantSize } or null if length <= 0.
+function _packSections(lengthFt) {
+  if (lengthFt <= 0) return null;
+  let best = null;
+  const max = Math.ceil(lengthFt / 6) + 1;
+  for (let a = 0; a <= max; a++) {        // 8' count
+    for (let b = 0; b <= max; b++) {      // 6' count
+      const covered = a * 8 + b * 6;
+      if (covered < lengthFt) continue;
+      const sections = a + b;
+      if (sections === 0) continue;
+      const waste = covered - lengthFt;
+      if (!best ||
+          sections < best.sections ||
+          (sections === best.sections && waste < best.waste)) {
+        best = { sections, waste, mix: { 8: a, 6: b } };
+      }
+    }
+  }
+  if (!best) return null;
+  best.dominantSize = best.mix[8] >= best.mix[6] ? 8 : 6;
+  return best;
+}
+
 function _railRunTally(run) {
   const secLen = run.sectionLengthFt || 6;
   // Resolve portions (new model first, fall back to legacy lengthFt)
@@ -6371,12 +6578,19 @@ function rollupBOM(input) {
   const resurface = !!input.resurfaceExisting;
   const reinforce = !!input.reinforceJoists;
 
-  // Resolve profiles — pass user's chosen profileId AND color so per-color filters apply
+  // Demo-only mode: a customer can quote a teardown without specifying a new build.
+  // The rest of the calc (decking, framing, fasteners, railing, etc.) silently
+  // produces empty BOM lines when input.P/W/H_in are 0 and no main collection
+  // is picked, so we just let it flow through.
+  const newDeckConfigured = !!(input.main?.series && input.main?.collection && input.P && input.W);
+
+  // Resolve profiles — pass user's chosen profileId AND color so per-color filters apply.
+  // Safe to call even when newDeckConfigured is false (returns null profiles).
   const mainColorForResolve = input.main?.color;
-  const mainProfile = resolveDeckingProfile({
+  const mainProfile = newDeckConfigured ? resolveDeckingProfile({
     series: input.main.series, collection: input.main.collection,
     use: "field", profileId: input.main.profileId, color: mainColorForResolve
-  });
+  }) : null;
   const pfColorR = input.pf?.sameAsMain ? mainColorForResolve : input.pf?.color;
   const pfProfile = input.pf?.sameAsMain ? (mainProfile && mainProfile.id === "max_2x6"
       ? resolveDeckingProfile({ series: input.main.series, collection: input.main.collection, use: "pf", profileId: "max_2x6", color: mainColorForResolve })
@@ -6415,7 +6629,9 @@ function rollupBOM(input) {
   let totalPosts = 0;
   let blocking = { totalBlockingLF: 0, bom: [] };
 
-  if (!resurface) {
+  // For demo-only projects, skip the entire new-build framing block. Profile resolution
+  // already returns null; we just don't want phantom joist/beam/ledger lines added.
+  if (!resurface && newDeckConfigured) {
     // Full new framing: joists, beam, ledger, hangers, posts, lateral, blocking
     bom.push(makeBOMLine({
       category: "framing",
@@ -6438,7 +6654,24 @@ function rollupBOM(input) {
       }));
     }
 
-    bom.push(...countLedgerSystem(input.W, joistInfo.size, input.P, input.attachment));
+    // Back wall length defaults to full deck width; if user specified a partial back wall,
+    // ledger scales proportionally and the rest of the back side will need its own posts/beam.
+    bom.push(...countLedgerSystem(input.W, joistInfo.size, input.P, input.attachment, input.walls?.back));
+    // Side-wall Z-flashing (Front, Left, Right) — wherever the deck butts up against a wall.
+    const sideWallLF =
+      Math.min(input.walls?.front || 0, input.W) +
+      Math.min(input.walls?.left  || 0, input.P) +
+      Math.min(input.walls?.right || 0, input.P);
+    if (sideWallLF > 0) {
+      bom.push(makeBOMLine({
+        category: "framing",
+        description: `Z-flashing along side walls (Front/Left/Right wall LF)`,
+        sku: "Z-FLASH",
+        qty_raw: sideWallLF,
+        unit: "lf",
+        notes: "Where the deck surface meets the house wall on a non-ledger side"
+      }));
+    }
     bom.push(...countJoistHangers(joistInfo.count, input.attachment, joistInfo.size));
 
     totalPosts = beamInfo.postCount * (input.attachment === "freestanding" ? 2 : 1);
@@ -6471,8 +6704,9 @@ function rollupBOM(input) {
       brkProfile?.actual_w_in || 5.5, input.P,
       joistOC, joistInfo?.size || "2x10");
     bom.push(...blocking.bom);
-  } else {
-    // Resurface mode — annotate that framing is preserved
+  } else if (newDeckConfigured) {
+    // Resurface mode — annotate that framing is preserved.
+    // Only emit when a new deck is configured (demo-only projects skip this note entirely).
     bom.push(makeBOMLine({
       category: "framing",
       description: `Existing framing preserved (resurface mode) - field-verify per code`,
@@ -6601,8 +6835,9 @@ function rollupBOM(input) {
     bom.push(...countDrinkRailBoard({ runs: allRailRuns, drinkRailBoard: drinkBoardProfile }).bom);
   }
 
-  // Tape — only covers framing we're adding (resurface skips; reinforcement joists still get tape)
-  if (!resurface) {
+  // Tape — only covers framing we're adding (resurface skips; reinforcement joists still get tape).
+  // Skip for demo-only projects (no new framing means no tape).
+  if (!resurface && newDeckConfigured) {
     bom.push(...countTape({
       joists: joistInfo,
       beams: beamInfo ? Array(beamInfo.beam_count).fill({ length_ft: beamInfo.length_ft }) : [],
@@ -6715,6 +6950,64 @@ function rollupBOM(input) {
     bom.push(_laborLine("railing", `Run ${i+1} railing labor (${sectionCount} sections x $25${specialtyNote})`, runLabor));
   });
 
+  // ── Demo (optional) — labor at $5/sqft (deck + stair treads); dumpster ──
+  let demoLaborTotal = 0;
+  let dumpsterTotal = 0;
+  if (input.demo?.enabled) {
+    const d = input.demo;
+    const deckDemoSF = (d.lengthFt || 0) * (d.widthFt || 0);
+    // Stair tread sqft = treads x stair_width x ~10" tread depth
+    const stairDemoSF = (d.stairs || []).reduce((acc, s) => {
+      if (!(s.width > 0) || !(s.height_in > 0)) return acc;
+      const risers = Math.ceil(s.height_in / IRC_STAIR.max_riser_in);
+      const treads = Math.max(0, risers - 1);
+      return acc + treads * s.width * (IRC_STAIR.min_tread_in / 12);
+    }, 0);
+    const totalDemoSF = deckDemoSF + stairDemoSF;
+    if (totalDemoSF > 0) {
+      demoLaborTotal = +(totalDemoSF * 3).toFixed(2);
+      bom.push(_laborLine("deck", `Demo labor (${totalDemoSF.toFixed(0)} sqft x $3/sqft — deck ${deckDemoSF.toFixed(0)}, stairs ${stairDemoSF.toFixed(0)}; railing teardown included)`, demoLaborTotal));
+    }
+    // Dumpster recommendation: 1 x 10-yd <= 200 SF, 1 x 20-yd <= 400, 1 x 30-yd <= 600,
+    // multiple 30-yds beyond that. Allow user to override via demo.dumpsterChoice.
+    const DUMPSTERS = { 10: 500, 20: 650, 30: 750 };
+    function recommendDumpsters(sf) {
+      if (sf <= 0) return [];
+      if (sf <= 200) return [{ size: 10, qty: 1 }];
+      if (sf <= 400) return [{ size: 20, qty: 1 }];
+      if (sf <= 600) return [{ size: 30, qty: 1 }];
+      return [{ size: 30, qty: Math.ceil(sf / 600) }];
+    }
+    let picks;
+    if (d.dumpsterChoice && d.dumpsterChoice !== "auto") {
+      const sz = parseInt(d.dumpsterChoice);
+      // If user picks a fixed size, scale qty to cover the demo SF
+      const sfPerUnit = sz === 10 ? 200 : sz === 20 ? 400 : 600;
+      picks = [{ size: sz, qty: Math.max(1, Math.ceil(totalDemoSF / sfPerUnit)) }];
+    } else {
+      picks = recommendDumpsters(totalDemoSF);
+    }
+    picks.forEach(p => {
+      const lineCost = DUMPSTERS[p.size] * p.qty;
+      dumpsterTotal += lineCost;
+      // Use "paperwork" category so the dumpster passes through at cost (no 75% markup
+      // and isn't double-counted in the materials rollup). It will be grouped into
+      // the Deck card on the customer summary via the paperworkTotal pass-through.
+      bom.push({
+        category: "paperwork",
+        customer_category: null,
+        description: `${p.qty} x ${p.size}-yard dumpster (${DUMPSTERS[p.size]} ea${d.dumpsterChoice === "auto" ? ", auto-recommended" : ", user-selected"})`,
+        sku: `DUMPSTER-${p.size}YD`,
+        qty_raw: p.qty,
+        qty: p.qty,
+        unit: "ea",
+        unit_price: DUMPSTERS[p.size],
+        total_price: lineCost,
+        notes: ""
+      });
+    });
+  }
+
   // ── Paperwork lines ──
   // Permit + arch-drawing fees are pass-through costs (no markup) at fixed rates.
   // To change pricing, edit these constants — they're not user-editable in the UI.
@@ -6743,17 +7036,24 @@ function rollupBOM(input) {
     notes: ""
   });
 
-  const laborTotal = +(deckLaborTotal + stairLaborTotal + railingLaborTotal).toFixed(2);
-  const grandTotal = +(materialsTotal + laborTotal + paperworkTotal + salesTax).toFixed(2);
+  const laborTotal = +(deckLaborTotal + stairLaborTotal + railingLaborTotal + demoLaborTotal).toFixed(2);
+  const grandTotal = +(materialsTotal + laborTotal + paperworkTotal + salesTax + dumpsterTotal).toFixed(2);
 
   // ── Customer-facing pricing (markup) ──
-  // Mark up materials + labor by 85%. Permits and arch drawings pass through at cost.
+  // Mark up materials + labor by 75%. Permits + arch drawings pass through at cost.
   // Sales tax is recomputed against the marked-up materials price (NC: tax on retail).
-  const MARKUP = 1.85;
+  // Demo is now its OWN customer card (no longer folded into Deck).
+  const MARKUP = 1.75;
   const customer = buildCustomerSummary({
     bom,
-    deckLaborTotal, stairLaborTotal, railingLaborTotal,
-    paperworkTotal, taxRatePct, markup: MARKUP
+    deckLaborTotal,
+    stairLaborTotal,
+    railingLaborTotal,
+    demoLaborTotal,
+    dumpsterTotal,
+    paperworkTotal,
+    taxRatePct,
+    markup: MARKUP
   });
 
   return {
@@ -6761,6 +7061,7 @@ function rollupBOM(input) {
     total: grandTotal,                  // back-compat: contractor grand total
     materialsTotal,
     laborTotal, deckLaborTotal, stairLaborTotal, railingLaborTotal,
+    demoLaborTotal, dumpsterTotal,
     paperworkTotal, salesTax,
     grandTotal,
     customer
@@ -6768,7 +7069,7 @@ function rollupBOM(input) {
 }
 
 // Build the customer-facing pricing object (used by the Project Summary card)
-function buildCustomerSummary({ bom, deckLaborTotal, stairLaborTotal, railingLaborTotal, paperworkTotal, taxRatePct, markup }) {
+function buildCustomerSummary({ bom, deckLaborTotal, stairLaborTotal, railingLaborTotal, demoLaborTotal = 0, dumpsterTotal = 0, paperworkTotal, taxRatePct, markup }) {
   // Sum material cost by customer_category (exclude labor/paperwork/tax lines)
   const matByCat = { deck: 0, railing: 0, stair: 0 };
   bom.forEach(l => {
@@ -6779,7 +7080,7 @@ function buildCustomerSummary({ bom, deckLaborTotal, stairLaborTotal, railingLab
   });
 
   // Fold sales tax into per-category materials BEFORE markup, so the markup absorbs the tax.
-  // This means the customer never sees a separate tax line — no double-taxation.
+  // (Customer never sees a separate tax line — no double-taxation.)
   const taxMul = 1 + (taxRatePct / 100);
   const matWithTax = {
     deck:    matByCat.deck    * taxMul,
@@ -6787,17 +7088,20 @@ function buildCustomerSummary({ bom, deckLaborTotal, stairLaborTotal, railingLab
     stair:   matByCat.stair   * taxMul
   };
 
-  // Apply markup. Paperwork passes through at cost — fold into Deck card.
+  // Apply markup per card. Paperwork (permits/drawings) folded into Deck at cost.
+  // Demo is now its OWN card (was previously folded into Deck).
   const m = markup;
   const deck    = +((matWithTax.deck    * m) + (deckLaborTotal    * m) + paperworkTotal).toFixed(2);
   const railing = +((matWithTax.railing * m) + (railingLaborTotal * m)).toFixed(2);
   const stair   = +((matWithTax.stair   * m) + (stairLaborTotal   * m)).toFixed(2);
+  // Demo: marked-up labor + dumpster pass-through (no markup — like permit fees).
+  const demo    = +(((demoLaborTotal || 0) * m) + (dumpsterTotal || 0)).toFixed(2);
 
-  const grand   = +(deck + railing + stair).toFixed(2);
+  const grand   = +(deck + railing + stair + demo).toFixed(2);
   const deposit = +(grand * 0.35).toFixed(2);    // 35% deposit upfront
 
   return {
-    deck, railing, stair,
+    deck, railing, stair, demo,
     grand,
     deposit,
     paperworkFoldedInto: "deck",
@@ -6879,6 +7183,7 @@ if (typeof window !== "undefined") {
     intersectColors,
     validateRailing,
     validateStairs,
+    _packSections, _computeOpenSides,
     resolveRailingPanelSKU, resolveRailingTopRailSKU, resolveRailingPostSKU,
     resolveRailingCapSKU, resolveRailingSkirtSKU, resolveBalusterPackSKU, resolveRailingBracketSKU,
     findDeckingSKU,
@@ -7006,6 +7311,32 @@ window.addEventListener("DOMContentLoaded", () => {
   // Listen on every numeric input
   ["dkP", "dkW", "dkH", "brkN"].forEach(id => $(id).addEventListener("input", recalc));
   ["ncRegion", "attachment", "pfRows", "existingJoistSize"].forEach(id => $(id).addEventListener("change", recalc));
+  // Wall length inputs — recompute open perimeter + flashing + auto-route.
+  // Note: Front is never an input — a deck's front edge is always open (away from house).
+  ["wallBackLF", "wallLeftLF", "wallRightLF"].forEach(id =>
+    $(id)?.addEventListener("input", recalc)
+  );
+  // Attachment toggles default wall LF: attached -> Back = deck width, others = 0;
+  // freestanding -> all = 0. User can override after toggling.
+  $("attachment")?.addEventListener("change", () => {
+    const attached = $("attachment").value === "attached";
+    const W = parseFloat($("dkW").value) || 0;
+    $("wallBackLF").value  = attached ? W : 0;
+    $("wallLeftLF").value  = 0;
+    $("wallRightLF").value = 0;
+    recalc();
+  });
+  // When deck width changes, auto-update Back wall LF if it currently equals the OLD width
+  // (i.e., still on the default). User-edited values are preserved.
+  let _lastW = parseFloat($("dkW").value) || 0;
+  $("dkW")?.addEventListener("input", () => {
+    const newW = parseFloat($("dkW").value) || 0;
+    const curBack = parseFloat($("wallBackLF").value) || 0;
+    if (_lastW > 0 && Math.abs(curBack - _lastW) < 0.01 && $("attachment").value === "attached") {
+      $("wallBackLF").value = newW;
+    }
+    _lastW = newW;
+  });
   ["existingJoistOC", "taxRate"].forEach(id => $(id)?.addEventListener("input", recalc));
 
   // Resurface / Reinforce toggles
@@ -7045,8 +7376,324 @@ window.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+  // Demo section wiring
+  _wireDemoSection();
+
+  // Auto-route railing toggle + cascade
+  _wireAutoRouteRailing();
+
   recalc();
 });
+
+// ─── Auto-route railing ─────────────────────────────────────
+// When the user enables auto-route, hide manual run controls and show a single
+// shared config. The shared config uses the same data-rail-* attributes as
+// manual run cards so we can reuse wireRailRunCascade for the dropdown cascade.
+function _wireAutoRouteRailing() {
+  const cb = $("railAutoRoute");
+  if (!cb) return;
+  cb.addEventListener("change", () => {
+    const on = cb.checked;
+    $("railAutoConfig").style.display = on ? "" : "none";
+    $("railManualSection").style.display = on ? "none" : "";
+    recalc();
+  });
+  // Cascade inputs are inside #railAutoConfig — reuse wireRailRunCascade
+  const cfgDiv = $("railAutoConfig");
+  cfgDiv.querySelectorAll("input,select").forEach(input => {
+    input.addEventListener("input", () => { wireRailRunCascade(cfgDiv); recalc(); });
+    input.addEventListener("change", () => { wireRailRunCascade(cfgDiv); recalc(); });
+  });
+}
+
+// Shared slope math for a stair. Returns total rise/run/slope for the (single)
+// flight on linear stairs, or per-flight values for L/U stairs.
+// All lengths returned in feet; rises in inches match input.
+function _stairSlopeMath(stair, H_in) {
+  const RISER_IN = 7.75;   // IRC max riser
+  const TREAD_IN = 10;     // IRC nominal tread depth
+  const shape = stair.shape || "linear";
+  if (shape !== "L" && shape !== "U") {
+    const risers = Math.max(1, Math.ceil(H_in / RISER_IN));
+    const treads = Math.max(0, risers - 1);
+    const run_in = treads * TREAD_IN;
+    const slope_ft = Math.sqrt(H_in * H_in + run_in * run_in) / 12;
+    return { kind: "linear", risers, treads, run_in, slope_ft };
+  }
+  const landingH_in = +stair.landingHeight || H_in / 2;
+  const topRise_in  = Math.max(RISER_IN, H_in - landingH_in);
+  const botRise_in  = Math.max(RISER_IN, landingH_in);
+  const topRisers = Math.max(1, Math.ceil(topRise_in / RISER_IN));
+  const botRisers = Math.max(1, Math.ceil(botRise_in / RISER_IN));
+  const topTreads = Math.max(0, topRisers - 1);
+  const botTreads = Math.max(0, botRisers - 1);
+  const topRun_in = topTreads * TREAD_IN;
+  const botRun_in = botTreads * TREAD_IN;
+  const topSlope_ft = Math.sqrt(topRise_in * topRise_in + topRun_in * topRun_in) / 12;
+  const botSlope_ft = Math.sqrt(botRise_in * botRise_in + botRun_in * botRun_in) / 12;
+  return {
+    kind: shape,
+    landingH_in,
+    topRise_in, topRisers, topTreads, topRun_in, topSlope_ft,
+    botRise_in, botRisers, botTreads, botRun_in, botSlope_ft
+  };
+}
+
+// Emit handrail + landing runs for a single stair. Returns an array of
+// run objects shaped like manual-form runs so countRailing consumes them
+// without special-casing.
+//   - Linear: 2 handrail runs (top flight only).
+//   - L:      4 handrail runs (top + bottom) + 1 landing run (1 corner).
+//   - U:      4 handrail runs + 1 landing run (2 corners).
+function _buildStairRuns(stair, H_in, sharedConfig) {
+  const runs = [];
+  const slope = _stairSlopeMath(stair, H_in);
+  const shape = stair.shape || "linear";
+
+  function handrail(slopeFt, label) {
+    return {
+      levelLengthFt: 0,
+      stairLengthFt: +slopeFt.toFixed(2),
+      hasStair: true,
+      lengthFt: +slopeFt.toFixed(2),
+      corners90: 0, corners45: 0, wallTerminations: 0,
+      adaHandrail: "",
+      material: sharedConfig.material,
+      collection: sharedConfig.collection,
+      height: sharedConfig.height,
+      sectionLengthFt: slopeFt >= 8 ? 8 : 6,
+      topRail: sharedConfig.topRail,
+      infill: sharedConfig.infill,
+      postSize: sharedConfig.postSize,
+      postCap: sharedConfig.postCap,
+      postSkirt: sharedConfig.postSkirt,
+      color: sharedConfig.color,
+      _autoSide: label
+    };
+  }
+
+  if (shape !== "L" && shape !== "U") {
+    runs.push(handrail(slope.slope_ft, "Stair flight (L)"));
+    runs.push(handrail(slope.slope_ft, "Stair flight (R)"));
+    return runs;
+  }
+
+  // L/U: top + bottom flights + landing
+  runs.push(handrail(slope.topSlope_ft, "Stair top (L)"));
+  runs.push(handrail(slope.topSlope_ft, "Stair top (R)"));
+  runs.push(handrail(slope.botSlope_ft, "Stair bot (L)"));
+  runs.push(handrail(slope.botSlope_ft, "Stair bot (R)"));
+
+  const w  = +stair.width || 4;
+  const ld = +stair.landingDepth || w;
+  let landingLF, corners90;
+  if (shape === "L") {
+    landingLF = w + ld;
+    corners90 = 1;
+  } else {
+    // U-shape landing: 2*width + 0.3 ft inter-flight gap (matches engine geometry)
+    landingLF = (2 * w + 0.3) + 2 * ld;
+    corners90 = 2;
+  }
+  const pack = (typeof _packSections === "function") ? _packSections(landingLF) : null;
+  runs.push({
+    levelLengthFt: +landingLF.toFixed(2),
+    stairLengthFt: 0,
+    hasStair: false,
+    lengthFt: +landingLF.toFixed(2),
+    corners90, corners45: 0, wallTerminations: 0,
+    adaHandrail: "",
+    material: sharedConfig.material,
+    collection: sharedConfig.collection,
+    height: sharedConfig.height,
+    sectionLengthFt: pack?.dominantSize || (landingLF >= 8 ? 8 : 6),
+    topRail: sharedConfig.topRail,
+    infill: sharedConfig.infill,
+    postSize: sharedConfig.postSize,
+    postCap: sharedConfig.postCap,
+    postSkirt: sharedConfig.postSkirt,
+    color: sharedConfig.color,
+    _autoSide: shape === "L" ? "L-landing" : "U-landing",
+    _autoPack: pack
+  });
+  return runs;
+}
+
+// Returns an array of warning strings for auto-routed stair placements.
+// Empty when auto-route is off or every stair fits its side cleanly.
+function _stairAutoValidation(stairs, walls, P, W) {
+  if (!$("railAutoRoute")?.checked) return [];
+  const sides = {
+    front: { L: W, wall: Math.max(0, Math.min(W, +walls.front || 0)) },
+    back:  { L: W, wall: Math.max(0, Math.min(W, +walls.back  || 0)) },
+    left:  { L: P, wall: Math.max(0, Math.min(P, +walls.left  || 0)) },
+    right: { L: P, wall: Math.max(0, Math.min(P, +walls.right || 0)) }
+  };
+  Object.values(sides).forEach(s => { s.openL = Math.max(0, s.L - s.wall); });
+
+  const errors = [];
+  const stairsBySide = {};
+  stairs.forEach((st, i) => {
+    const side = st.descendsFrom || "front";
+    (stairsBySide[side] ||= []).push({ idx: i, stair: st });
+  });
+
+  Object.entries(stairsBySide).forEach(([sideName, group]) => {
+    const side = sides[sideName];
+    if (!side) return;
+    const label = sideName[0].toUpperCase() + sideName.slice(1);
+    if (side.openL === 0) {
+      group.forEach(({ idx }) => {
+        errors.push(`${label} has no open space for Stair ${idx + 1}. Pick another side or reduce wall length.`);
+      });
+      return;
+    }
+    if (group.length > 1) {
+      errors.push(`Auto-route assumes one stair per side. Use custom railing runs for the ${label} side if this isn't a single centered stair.`);
+    }
+    group.forEach(({ idx, stair }) => {
+      if (stair.width > side.openL + 0.001) {
+        errors.push(`Stair ${idx + 1} (${stair.width} ft wide) doesn't fit on ${label} (${side.openL} ft open after walls).`);
+      }
+    });
+  });
+  return errors;
+}
+
+// Build synthetic railing runs from the auto-config and the open-perimeter sides.
+// Returns an array of run objects shaped exactly like manual readForm output so
+// downstream code (validateRailing, countRailing) doesn't need to know auto-route exists.
+function buildAutoRailingRuns(walls, P, W) {
+  if (!$("railAutoRoute")?.checked) return null;
+  if (!(P > 0) || !(W > 0)) return [];
+  const cfg = $("railAutoConfig");
+  if (!cfg) return [];
+
+  const sharedConfig = {
+    material:        cfg.querySelector("[data-rail-material]")?.value || "",
+    collection:      cfg.querySelector("[data-rail-collection]")?.value || "",
+    height:          parseInt(cfg.querySelector("[data-rail-height]")?.value) || 36,
+    color:           cfg.querySelector("[data-rail-color]")?.value || "",
+    topRail:         cfg.querySelector("[data-rail-toprail]")?.value || "",
+    infill:          cfg.querySelector("[data-rail-infill]")?.value || "",
+    postSize:        cfg.querySelector("[data-rail-sleeve]")?.value || "",
+    postCap:         cfg.querySelector("[data-rail-cap]")?.value || "",
+    postSkirt:       cfg.querySelector("[data-rail-skirt]")?.value || ""
+  };
+
+  function clampWall(v, maxLen) {
+    if (typeof v === "boolean") return v ? maxLen : 0;
+    return Math.max(0, Math.min(maxLen, +v || 0));
+  }
+  const sides = [
+    { name: "back",  L: W, wall: clampWall(walls.back,  W) },
+    { name: "front", L: W, wall: clampWall(walls.front, W) },
+    { name: "left",  L: P, wall: clampWall(walls.left,  P) },
+    { name: "right", L: P, wall: clampWall(walls.right, P) }
+  ].map(s => ({ ...s, openL: Math.max(0, s.L - s.wall) }));
+
+  // Read the latest stair data right here (auto-router runs at form-read time).
+  const stairs = [...document.querySelectorAll("#stairList .card")].map(d => ({
+    width:         parseFloat(d.querySelector("[data-stair-width]")?.value) || 0,
+    shape:         d.querySelector("[data-stair-shape]")?.value || "linear",
+    descendsFrom:  d.querySelector("[data-stair-descends-from]")?.value || "front",
+    landingHeight: parseFloat(d.querySelector("[data-stair-landing-height]")?.value) || 0,
+    landingDepth:  parseFloat(d.querySelector("[data-stair-landing-depth]")?.value) || 0
+  })).filter(s => s.width > 0);
+
+  const H_in = parseFloat($("dkH")?.value) || 0;
+
+  // Stairs grouped by descending side. Only sides with open length receive cuts.
+  const stairsBySide = { front: [], left: [], right: [], back: [] };
+  stairs.forEach(s => { if (stairsBySide[s.descendsFrom]) stairsBySide[s.descendsFrom].push(s); });
+
+  // Corner pair availability (both adjacent sides must be open).
+  const openSet = new Set(sides.filter(s => s.openL > 0).map(s => s.name));
+  const corners = {
+    "front-left":  openSet.has("front") && openSet.has("left"),
+    "front-right": openSet.has("front") && openSet.has("right"),
+    "back-left":   openSet.has("back")  && openSet.has("left"),
+    "back-right":  openSet.has("back")  && openSet.has("right")
+  };
+
+  // Pass 1: per-side level sub-runs.
+  const runs = [];
+  function pushLevel(lengthFt, side, label, cornerCount) {
+    if (lengthFt <= 0.01) return;
+    const pack = (typeof _packSections === "function") ? _packSections(lengthFt) : null;
+    runs.push({
+      levelLengthFt: +lengthFt.toFixed(2),
+      stairLengthFt: 0,
+      hasStair: false,
+      lengthFt: +lengthFt.toFixed(2),
+      corners90: cornerCount || 0,
+      corners45: 0,
+      wallTerminations: 0,
+      adaHandrail: "",
+      material: sharedConfig.material,
+      collection: sharedConfig.collection,
+      height: sharedConfig.height,
+      sectionLengthFt: pack?.dominantSize || (lengthFt >= 8 ? 8 : 6),
+      topRail: sharedConfig.topRail,
+      infill: sharedConfig.infill,
+      postSize: sharedConfig.postSize,
+      postCap: sharedConfig.postCap,
+      postSkirt: sharedConfig.postSkirt,
+      color: sharedConfig.color,
+      _autoSide: `${side} (${label})`,
+      _autoPack: pack
+    });
+  }
+
+  // Corner-claim convention: each corner is awarded to the FIRST side that
+  // touches it (sides processed back -> front -> left -> right). Prevents
+  // double-counting when both sides of a corner are open.
+  const cornerOwned = { "front-left": false, "front-right": false, "back-left": false, "back-right": false };
+  function claimCorner(key) {
+    if (corners[key] && !cornerOwned[key]) { cornerOwned[key] = true; return 1; }
+    return 0;
+  }
+
+  sides.forEach(s => {
+    if (s.openL <= 0) return;
+    const sideStairs = stairsBySide[s.name];
+    // Two corners that touch this side, in walk order from back-corner -> front-corner.
+    const cornerKeyA = s.name === "back" ? "back-left"  : s.name === "front" ? "front-left"  : s.name === "left" ? "back-left"  : "back-right";
+    const cornerKeyB = s.name === "back" ? "back-right" : s.name === "front" ? "front-right" : s.name === "left" ? "front-left" : "front-right";
+
+    if (sideStairs.length === 0) {
+      const cornerA = claimCorner(cornerKeyA);
+      const cornerB = claimCorner(cornerKeyB);
+      pushLevel(s.openL, s.name, "open", cornerA + cornerB);
+      return;
+    }
+
+    // Distribute stairs evenly across the open portion: gap-stair-gap-stair-gap.
+    const widths = sideStairs.map(st => st.width);
+    const totalStairW = widths.reduce((a, b) => a + b, 0);
+    const remaining = Math.max(0, s.openL - totalStairW);
+    const gapEach = remaining / (sideStairs.length + 1);
+
+    let cursor = 0;
+    sideStairs.forEach((st, idx) => {
+      const isFirst = idx === 0;
+      const cornerHere = isFirst ? claimCorner(cornerKeyA) : 0;
+      pushLevel(gapEach, s.name, `pre-stair ${idx + 1}`, cornerHere);
+      cursor += gapEach + st.width;
+    });
+    const tailLen = s.openL - cursor;
+    const cornerTail = claimCorner(cornerKeyB);
+    pushLevel(tailLen, s.name, `post-stair ${sideStairs.length}`, cornerTail);
+  });
+
+  // Pass 2: per-stair flight + landing runs.
+  stairs.forEach(st => {
+    const stairRuns = _buildStairRuns(st, H_in, sharedConfig);
+    runs.push(...stairRuns);
+  });
+
+  return runs;
+}
 
 // recalc + addStair + addRailRun + render — populated in next tasks
 function readForm() {
@@ -7058,6 +7705,7 @@ function readForm() {
     return {
       width,
       shape,
+      descendsFrom: d.querySelector("[data-stair-descends-from]")?.value || "front",
       topPlatform: topPlatformOn,
       topPlatformDepth: topPlatformOn ? (parseFloat(d.querySelector("[data-stair-top-depth]")?.value) || 3) : 0,
       landingHeight: (shape === "L" || shape === "U") ? (parseFloat(d.querySelector("[data-stair-landing-height]")?.value) || 0) : 0,
@@ -7100,7 +7748,41 @@ function readForm() {
     };
   }).filter(r => (r.levelLengthFt + r.stairLengthFt) > 0 && r.material && r.collection);
 
+  // Demo (optional) — existing deck + existing stairs to tear out
+  const demoEnabled = $("demoEnabled")?.checked || false;
+  const demoStairs = [...document.querySelectorAll("#demoStairList .demo-stair-row")].map(d => ({
+    width: parseFloat(d.querySelector("[data-demo-stair-w]")?.value) || 0,
+    height_in: parseFloat(d.querySelector("[data-demo-stair-h]")?.value) || 0
+  })).filter(s => s.width > 0 && s.height_in > 0);
+  const demo = demoEnabled ? {
+    enabled: true,
+    lengthFt: parseFloat($("demoLength")?.value) || 0,
+    widthFt: parseFloat($("demoWidth")?.value) || 0,
+    heightIn: parseFloat($("demoHeight")?.value) || 0,
+    stairs: demoStairs,
+    dumpsterChoice: $("demoDumpster")?.value || "auto"     // "auto" | "10" | "20" | "30"
+  } : { enabled: false };
+
+  // Walls: length of wall against house on each side (ft). 0 = no wall.
+  // Front is always 0 — a deck's front edge is always open and railed.
+  // Left/Right walls extend FROM the back corner (wing walls attached to the house).
+  const walls = {
+    back:  parseFloat($("wallBackLF")?.value)  || 0,
+    front: 0,
+    left:  parseFloat($("wallLeftLF")?.value)  || 0,
+    right: parseFloat($("wallRightLF")?.value) || 0
+  };
+
+  // If auto-route is enabled, replace manual railingRuns with synthesized ones
+  const P_for_walls = parseFloat($("dkP").value) || 0;
+  const W_for_walls = parseFloat($("dkW").value) || 0;
+  const autoRuns = buildAutoRailingRuns(walls, P_for_walls, W_for_walls);
+  const railingRunsFinal = autoRuns !== null ? autoRuns : railingRuns;
+
   return {
+    demo,
+    walls,
+    railAutoRoute: $("railAutoRoute")?.checked || false,
     P: parseFloat($("dkP").value) || 0,
     W: parseFloat($("dkW").value) || 0,
     H_in: parseFloat($("dkH").value) || 0,
@@ -7143,7 +7825,7 @@ function readForm() {
       color: $("drinkColor")?.value
     },
     stairs,
-    railingRuns
+    railingRuns: railingRunsFinal
   };
 }
 
@@ -7164,7 +7846,17 @@ function _stripRunPrefix(desc) {
 function aggregateBOMBySKU(lines) {
   const byKey = new Map();
   lines.forEach(line => {
-    const key = line.sku && line.sku !== "-" ? line.sku : `__nosku__:${_stripRunPrefix(line.description)}`;
+    // Labor lines share sku="LABOR" and paperwork lines share sku="PAPERWORK",
+    // but each is semantically distinct (deck labor vs stair labor, permit vs
+    // arch drawings, etc). Key them by description so they stay as separate rows.
+    let key;
+    if (line.category === "labor" || line.category === "paperwork") {
+      key = `${line.category.toUpperCase()}:${line.description}`;
+    } else if (line.sku && line.sku !== "-") {
+      key = line.sku;
+    } else {
+      key = `__nosku__:${_stripRunPrefix(line.description)}`;
+    }
     const runMatch = (line.description || "").match(/^\s*Run\s+(\d+)/i);
     const runNum = runMatch ? parseInt(runMatch[1]) : null;
     if (!byKey.has(key)) {
@@ -7203,15 +7895,19 @@ function _runChip(runs) {
 function renderBOM(bom, grandTotal) {
   const groups = {};
   bom.forEach(line => {
-    // Paperwork is customer-facing only — keep it out of the contractor's BOM tab
-    if (line.category === "paperwork") return;
+    // Dumpster stays hidden on the contractor BOM — its cost shows on the
+    // customer Demolition card. Everything else (permits, arch drawings)
+    // becomes a visible "Permits & Drawings" row so the user can see what
+    // contributes to the grand total.
+    if (line.category === "paperwork" && (line.sku || "").startsWith("DUMPSTER-")) return;
     (groups[line.category] ||= []).push(line);
   });
-  const groupOrder = ["framing", "decking", "fascia", "stair", "railing", "fastener", "hardware", "tape", "concrete", "labor", "tax"];
+  const groupOrder = ["framing", "decking", "fascia", "stair", "railing", "fastener", "hardware", "tape", "concrete", "labor", "paperwork", "tax"];
   const groupLabels = {
     framing: "Framing", decking: "Decking", fascia: "Fascia", stair: "Stairs",
     railing: "Railing", fastener: "Fasteners", hardware: "Hardware",
-    tape: "Joist Tape", concrete: "Concrete", labor: "Labor", tax: "Sales Tax"
+    tape: "Joist Tape", concrete: "Concrete", labor: "Labor",
+    paperwork: "Permits & Drawings", tax: "Sales Tax"
   };
   let html = "";
   let untracked = 0;
@@ -7239,10 +7935,12 @@ function renderBOM(bom, grandTotal) {
     </div>`;
   });
 
-  // Grand total
+  // Grand total — labeled accurately. tax + permits/drawings ARE included;
+  // dumpster (still hidden on the BOM by design) is NOT, so the displayed
+  // total matches the sum of visible rows.
   if (grandTotal != null) {
     html += `<div class="bom-total">
-      <div class="bom-total-label">Subtotal (before tax)</div>
+      <div class="bom-total-label">Grand Total <span class="bom-total-note" style="font-weight:400;opacity:.6;">includes tax + permits/drawings</span></div>
       <div class="bom-total-value">${fmtMoney(grandTotal)}</div>
     </div>`;
     if (untracked > 0) {
@@ -7279,6 +7977,26 @@ function renderCustomerSummary(out, input) {
 
   if (input.resurfaceExisting) deckItems.push("Resurface (existing framing preserved)");
   if (input.reinforceJoists)   deckItems.push(`Joist reinforcement to 12" OC`);
+  // Installation labor is rolled into the card total; surface it as a line so the
+  // customer can see it's included rather than wondering if it was forgotten.
+  if ((out.deckLaborTotal || 0) > 0) deckItems.push("Deck installation labor (included)");
+
+  // Demo is now its OWN card (no longer folded into Deck). Build the line items here.
+  const demoItems = [];
+  if (input.demo?.enabled) {
+    const demoDeckSF = (input.demo.lengthFt || 0) * (input.demo.widthFt || 0);
+    const demoStairSF = (input.demo.stairs || []).reduce((acc, s) => {
+      const risers = s.height_in > 0 ? Math.ceil(s.height_in / 7.75) : 0;
+      const treads = Math.max(0, risers - 1);
+      return acc + treads * (s.width || 0) * (10 / 12);
+    }, 0);
+    const totalDemoSF = demoDeckSF + demoStairSF;
+    if (demoDeckSF > 0) demoItems.push(`Existing deck removal (~${demoDeckSF.toFixed(0)} sqft)`);
+    if (demoStairSF > 0) demoItems.push(`Existing stair removal (~${demoStairSF.toFixed(1)} sqft of treads)`);
+    if (totalDemoSF > 0) demoItems.push("Existing railing teardown (included)");
+    if ((out.dumpsterTotal || 0) > 0) demoItems.push("Dumpster rental + haul-off");
+    if ((out.demoLaborTotal || 0) > 0) demoItems.push("Demolition labor (included)");
+  }
 
   const railItems = [];
   (input.railingRuns || []).forEach((r, i) => {
@@ -7288,17 +8006,20 @@ function renderCustomerSummary(out, input) {
     if (r.infill)    railItems.push(`  Infill: ${r.infill}`);
     if (r.postSize)  railItems.push(`  Post: ${r.postSize} sleeve, ${prettifyColor(r.color)}`);
   });
+  if ((out.railingLaborTotal || 0) > 0) railItems.push("Railing installation labor (included)");
 
   const stairItems = [];
   (input.stairs || []).forEach((s, i) => {
     const risers = Math.ceil((input.H_in || 0) / 7.75);
     stairItems.push(`Stair ${i+1}: ${s.width}ft wide, ${risers} risers, ${risers-1} treads`);
   });
+  if ((out.stairLaborTotal || 0) > 0) stairItems.push("Stair construction labor (included)");
   // (Stair railings now appear as their own railing runs in the Railing card;
   // user can modify/remove them from the form directly.)
 
   // Build HTML — single price per category card, no materials/labor split shown
   let html = "";
+  if (C.demo > 0)    html += summaryCategorySimple("Demolition", demoItems, C.demo);
   if (C.deck > 0)    html += summaryCategorySimple("Deck", deckItems, C.deck);
   if (C.railing > 0) html += summaryCategorySimple("Railing", railItems, C.railing);
   if (C.stair > 0)   html += summaryCategorySimple("Stairs", stairItems, C.stair);
@@ -7346,37 +8067,117 @@ function recalc() {
       $("dSqFt").textContent = "-"; $("dPerim").textContent = "-";
     }
 
-    // Compute stair step + rail-length previews
+    // Auto-route preview: list each generated run with its packed sections
+    if (input.railAutoRoute && (input.railingRuns || []).length > 0) {
+      const lines = input.railingRuns.map(r => {
+        const pack = r._autoPack;
+        let packTxt;
+        if (pack) {
+          const parts = [];
+          if (pack.mix[8]) parts.push(`${pack.mix[8]}×8'`);
+          if (pack.mix[6]) parts.push(`${pack.mix[6]}×6'`);
+          packTxt = `${parts.join(" + ")} = ${pack.mix[8]*8 + pack.mix[6]*6}'${pack.waste > 0 ? ` (trim ${pack.waste}')` : ""}`;
+        } else {
+          packTxt = "—";
+        }
+        // Use lengthFt (set on both level and stair runs) so stair handrails
+        // and landing runs display the right length, not 0.
+        return `${r._autoSide} ${r.lengthFt}': ${packTxt}`;
+      }).join("<br>");
+      if ($("autoRunsPreview")) $("autoRunsPreview").innerHTML = lines;
+    } else if ($("autoRunsPreview")) {
+      $("autoRunsPreview").textContent = "-";
+    }
+
+    // Open perimeter + total flashing per side. Partial walls subtract from each side.
+    if (input.P > 0 && input.W > 0) {
+      const sides = [
+        { name: "Back",  L: input.W, wall: Math.min(input.walls.back,  input.W) },
+        { name: "Front", L: input.W, wall: Math.min(input.walls.front, input.W) },
+        { name: "Left",  L: input.P, wall: Math.min(input.walls.left,  input.P) },
+        { name: "Right", L: input.P, wall: Math.min(input.walls.right, input.P) }
+      ].map(s => ({ ...s, open: Math.max(0, s.L - s.wall) }));
+      const totalOpenLF = sides.reduce((acc, s) => acc + s.open, 0);
+      const totalWallLF = sides.reduce((acc, s) => acc + s.wall, 0);
+      const detail = sides
+        .filter(s => s.open > 0)
+        .map(s => `${s.name} ${s.open}${s.wall ? `+${s.wall}w` : ""}`)
+        .join(", ");
+      $("dOpenPerim").textContent = `${totalOpenLF} LF  (${detail || "all walled"})`;
+      $("dFlashLF").textContent   = totalWallLF > 0 ? `${totalWallLF} LF Z-flashing` : "-";
+    } else {
+      $("dOpenPerim").textContent = "-";
+      $("dFlashLF").textContent = "-";
+    }
+
+    // Demo previews — SF, debris volume, recommended dumpster
+    if (input.demo?.enabled) {
+      const dSF = (input.demo.lengthFt || 0) * (input.demo.widthFt || 0);
+      const stairSF = (input.demo.stairs || []).reduce((acc, s) => {
+        const risers = s.height_in > 0 ? Math.ceil(s.height_in / 7.75) : 0;
+        const treads = Math.max(0, risers - 1);
+        return acc + treads * (s.width || 0) * (10 / 12);  // each tread = width × ~10" tread depth
+      }, 0);
+      const totalDemoSF = dSF + stairSF;
+      $("demoSF").textContent = `${totalDemoSF.toFixed(0)} sqft (deck ${dSF.toFixed(0)}, stairs ${stairSF.toFixed(0)})`;
+      // Rough debris volume: ~15 sqft per cubic yard for typical deck/stair demo
+      const demoVolYd = totalDemoSF / 15;
+      $("demoVol").textContent = `${demoVolYd.toFixed(1)} cu yd estimated`;
+      // Dumpster recommendation (no price shown — bundled into project cost)
+      let rec;
+      if      (totalDemoSF <= 200) rec = "1 x 10-yard";
+      else if (totalDemoSF <= 400) rec = "1 x 20-yard";
+      else if (totalDemoSF <= 600) rec = "1 x 30-yard";
+      else                          rec = `${Math.ceil(totalDemoSF / 600)} x 30-yard`;
+      $("demoRecommended").textContent = rec;
+    } else {
+      if ($("demoSF")) $("demoSF").textContent = "-";
+      if ($("demoVol")) $("demoVol").textContent = "-";
+      if ($("demoRecommended")) $("demoRecommended").textContent = "-";
+    }
+
+    // Compute stair step + rail-length previews (uses shared _stairSlopeMath helper)
     document.querySelectorAll("#stairList .card").forEach(d => {
       const w = parseFloat(d.querySelector("[data-stair-width]").value);
+      const shape = d.querySelector("[data-stair-shape]")?.value || "linear";
+      const landingHeight = parseFloat(d.querySelector("[data-stair-landing-height]")?.value) || 0;
       const stepDiv = d.querySelector("[data-stair-steps]");
       const railDiv = d.querySelector("[data-stair-rail-length]");
       if (w > 0 && input.H_in > 0) {
-        const r = Math.ceil(input.H_in / 7.75);
-        stepDiv.textContent = `${r} risers, ${r-1} treads`;
-        // Rail length = stringer length (Pythagorean from rise + run)
-        const totalRiseIn = r * 7.75;
-        const totalRunIn  = (r - 1) * 10;
-        const stringerFt  = Math.sqrt(totalRiseIn ** 2 + totalRunIn ** 2) / 12;
-        if (railDiv) railDiv.textContent = `${stringerFt.toFixed(1)} ft each side`;
+        const m = _stairSlopeMath({ shape, landingHeight }, input.H_in);
+        if (m.kind === "linear") {
+          stepDiv.textContent = `${m.risers} risers, ${m.treads} treads`;
+          if (railDiv) railDiv.textContent = `${m.slope_ft.toFixed(1)} ft each side`;
+        } else {
+          const totalRisers = m.topRisers + m.botRisers;
+          const totalTreads = m.topTreads + m.botTreads;
+          stepDiv.textContent = `${totalRisers} risers, ${totalTreads} treads (top ${m.topRisers}/bot ${m.botRisers})`;
+          if (railDiv) railDiv.textContent = `${m.topSlope_ft.toFixed(1)}+${m.botSlope_ft.toFixed(1)} ft slopes`;
+        }
       } else {
         stepDiv.textContent = "-";
         if (railDiv) railDiv.textContent = "-";
       }
     });
 
-    // Stop early if no main collection picked
-    if (!input.main.series || !input.main.collection || !input.P || !input.W) {
+    // Stop early if NOTHING is configured (no new deck AND no demo).
+    // Demo-only mode is allowed — produces a teardown-only BOM with demo labor + dumpster.
+    const newDeckConfigured = input.main.series && input.main.collection && input.P && input.W;
+    const demoConfigured = input.demo?.enabled && ((input.demo.lengthFt > 0 && input.demo.widthFt > 0) || (input.demo.stairs || []).length > 0);
+    if (!newDeckConfigured && !demoConfigured) {
       $("bomContent").innerHTML = `<div class="empty-state">
         <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
-        <p>Configure your deck</p><small>Pick dimensions + main collection to generate BOM</small></div>`;
+        <p>Configure your project</p><small>Pick deck dimensions + collection — or enable Demo for a teardown-only quote</small></div>`;
       $("bomActions").style.display = "none";
       return;
     }
 
     try {
       const out = rollupBOM(input);
-      $("bomContent").innerHTML = renderBOM(out.bom, out.grandTotal || out.total);
+      // BOM hides dumpster line item — exclude its cost from the displayed
+      // grand total so visible rows + footer reconcile.
+      const bomDisplayTotal = (out.grandTotal || out.total) - (out.dumpsterTotal || 0);
+      $("bomContent").innerHTML = renderBOM(out.bom, bomDisplayTotal);
       $("summaryContent").innerHTML = renderCustomerSummary(out, input);
       $("bomActions").style.display = "flex";
 
@@ -7388,12 +8189,14 @@ function recalc() {
       const badges = buildRailingBadges(errs);
       $("railValidation").innerHTML = badges.map(b => `<div class="badge ${b.level}">${b.text}</div>`).join("");
 
-      // Stair validation (IRC R311.7.3 etc.)
+      // Stair validation (IRC R311.7.3 etc.) + auto-route placement warnings
       const stairErrs = (typeof validateStairs === "function")
         ? validateStairs({ stairs: input.stairs, H_in: input.H_in })
         : [];
-      if (stairErrs.length) {
-        const stairBadges = stairErrs.map(t => `<div class="badge warn">${t}</div>`).join("");
+      const autoErrs = _stairAutoValidation(input.stairs, input.walls, input.P, input.W);
+      const allErrs = [...stairErrs, ...autoErrs];
+      if (allErrs.length) {
+        const stairBadges = allErrs.map(t => `<div class="badge warn">${t}</div>`).join("");
         // Append into railValidation container (single badge area) so users see all warnings together
         $("railValidation").innerHTML += stairBadges;
       }
@@ -7404,6 +8207,84 @@ function recalc() {
     }
   }, 200);
 }
+// ─── Demo (existing deck teardown) ──────────────────────────
+let _demoStairCounter = 0;
+function addDemoStair() {
+  _demoStairCounter++;
+  const id = `demo_stair_${_demoStairCounter}`;
+  // Default height to the existing-deck height already entered, if any
+  const defaultHeight = parseFloat($("demoHeight")?.value) || "";
+  const row = el("div", { class: "demo-stair-row row r3", id, style: "align-items:flex-end;" });
+  row.innerHTML = `
+    <div class="field">
+      <label>Stair ${_demoStairCounter} Width (ft)</label>
+      <input type="number" min="2" step="0.5" placeholder="e.g. 4" data-demo-stair-w inputmode="decimal">
+    </div>
+    <div class="field">
+      <label>Stair ${_demoStairCounter} Height (in) <em>(defaults to deck height)</em></label>
+      <input type="number" min="6" step="1" placeholder="e.g. 36" value="${defaultHeight}" data-demo-stair-h inputmode="numeric">
+    </div>
+    <div class="field" style="display:flex;flex-direction:column;justify-content:flex-end;">
+      <label>Auto-computed</label>
+      <div class="computed" data-demo-stair-computed style="font-size:12px;line-height:1.3;">-</div>
+      <button class="sub-card-remove" onclick="document.getElementById('${id}').remove();recalc();" aria-label="Remove" style="position:absolute;top:8px;right:8px;">&times;</button>
+    </div>
+  `;
+  $("demoStairList").appendChild(row);
+  row.querySelectorAll("input").forEach(i => {
+    i.addEventListener("input", () => { _updateDemoStairPreview(row); recalc(); });
+    i.addEventListener("change", () => { _updateDemoStairPreview(row); recalc(); });
+  });
+  _updateDemoStairPreview(row);
+  recalc();
+}
+
+function _updateDemoStairPreview(row) {
+  const w = parseFloat(row.querySelector("[data-demo-stair-w]").value) || 0;
+  const h = parseFloat(row.querySelector("[data-demo-stair-h]").value) || 0;
+  const out = row.querySelector("[data-demo-stair-computed]");
+  if (!out) return;
+  if (w > 0 && h > 0) {
+    const risers = Math.ceil(h / 7.75);
+    const treads = Math.max(0, risers - 1);
+    const tradeSqFt = treads * w * (10 / 12);
+    out.innerHTML = `${risers} risers / ${treads} treads<br><span style="color:var(--bone-mute);font-size:11px;">${tradeSqFt.toFixed(1)} sqft demo</span>`;
+  } else {
+    out.textContent = "-";
+  }
+}
+
+// Wire the demo toggle and recompute the demo SF / volume / dumpster preview.
+// Called from the DOMContentLoaded initializer (see below).
+function _wireDemoSection() {
+  const cb = $("demoEnabled");
+  if (!cb) return;
+  cb.addEventListener("change", () => {
+    $("demoFields").style.display = cb.checked ? "" : "none";
+    recalc();
+  });
+  ["demoLength", "demoWidth", "demoHeight", "demoDumpster"].forEach(id => {
+    $(id)?.addEventListener("input", () => {
+      // When deck height changes, propagate the new default to any existing demo-stair
+      // rows that haven't been customized (i.e., where the height field is blank).
+      if (id === "demoHeight") {
+        const newH = parseFloat($("demoHeight")?.value);
+        if (newH > 0) {
+          // Propagate to existing-stair height inputs that are still blank
+          document.querySelectorAll("#demoStairList .demo-stair-row [data-demo-stair-h]").forEach(inp => {
+            if (!inp.value) {
+              inp.value = newH;
+              _updateDemoStairPreview(inp.closest(".demo-stair-row"));
+            }
+          });
+        }
+      }
+      recalc();
+    });
+    $(id)?.addEventListener("change", recalc);
+  });
+}
+
 let _stairCounter = 0;
 function addStair() {
   _stairCounter++;
@@ -7414,6 +8295,15 @@ function addStair() {
     <div class="sub-card-header">
       <strong>Staircase ${stairNum}</strong>
       <button class="sub-card-remove" onclick="document.getElementById('${id}').remove();recalc();" aria-label="Remove">&times;</button>
+    </div>
+    <div class="row r2">
+      <div class="field"><label>Descends from <em>(side of deck)</em></label>
+        <select data-stair-descends-from>
+          <option value="front">Front edge (opposite house)</option>
+          <option value="left">Left side</option>
+          <option value="right">Right side</option>
+        </select></div>
+      <div class="field"></div>
     </div>
     <div class="row r3">
       <div class="field"><label>Width (ft)</label>
@@ -7763,7 +8653,7 @@ function buildCSV(bom, input) {
   const dims = `${input.P || "?"}x${input.W || "?"}`;
   const templateName = `Vivid Outdoor Living - ${dims} Deck (${today})`;
 
-  const MARKUP = 1.85;
+  const MARKUP = 1.75;
   const taxRate = (+input.taxRate || 7.5) / 100;
 
   const rows = [headers.join(",")];
@@ -7780,6 +8670,7 @@ function buildCSV(bom, input) {
     // Skip BOM-only lines that don't belong in a customer catalog export
     if (line.qty == null || line.qty <= 0) return;
     if (line.category === "tax") return;   // tax is computed by the receiving software
+    if (line.sku && line.sku.startsWith("DUMPSTER-")) return;   // dumpster is bundled into project cost, not itemized
 
     const cost = line.unit_price ?? 0;
     const isTaxable = ["framing","decking","fascia","stair","railing","fastener","hardware","tape","concrete"].includes(line.category);
